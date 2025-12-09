@@ -188,8 +188,8 @@ export function SimpleConverter() {
                   {amount} {fromUnitInput} = {displayResult.value} {toUnitInput}
                 </div>
                 {displayResult.usesDefaultDensity && (
-                  <div className="mt-3 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 p-2 rounded">
-                    Note: Using standard average density (water: 227g/cup)
+                  <div className="mt-4 text-xs text-muted-foreground bg-muted/50 border-l-2 border-muted-foreground/50 pl-3 pr-3 py-2 rounded-sm">
+                    <span className="font-medium">ℹ</span> Using standard water density (227g/cup)
                   </div>
                 )}
               </div>
@@ -218,8 +218,8 @@ export function SimpleConverter() {
                   {displayResult.value} {toUnitInput}
                 </div>
                 {displayResult.usesDefaultDensity && (
-                  <div className="mt-4 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 p-3 rounded">
-                    Note: Using standard average density (water: 227g/cup)
+                  <div className="mt-6 text-sm text-muted-foreground bg-muted/50 border-l-2 border-muted-foreground/50 pl-4 pr-4 py-3 rounded-sm">
+                    <span className="font-medium">ℹ</span> Using standard water density (227g/cup)
                   </div>
                 )}
               </div>
