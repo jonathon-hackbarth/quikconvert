@@ -158,7 +158,8 @@ export function formatAmount(
     
     if (closestFraction.denominator === 1) {
       // It's an integer
-      main = (intPart + closestFraction.numerator).toString();
+      const prefix = isRounded ? "~" : "";
+      main = `${prefix}${intPart + closestFraction.numerator}`;
     } else if (closestFraction.numerator === 0) {
       // It's 0
       if (intPart === 0) {
