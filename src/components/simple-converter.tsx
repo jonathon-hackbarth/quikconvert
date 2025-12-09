@@ -181,9 +181,12 @@ export function SimpleConverter() {
                   {displayResult.main}
                 </div>
                 {displayResult.subtitle && (
-                  <div className="text-xs text-muted-foreground mb-3">
-                    {displayResult.subtitle}
-                  </div>
+                  <>
+                    <div className="text-xs text-muted-foreground mb-3">
+                      {displayResult.subtitle}
+                    </div>
+                    <div className="h-px bg-border mb-3"></div>
+                  </>
                 )}
                 <div className="text-sm text-muted-foreground">
                   {amount} {fromUnitInput} = {displayResult.main} {toUnitInput}
@@ -212,9 +215,12 @@ export function SimpleConverter() {
                   {displayResult.main}
                 </div>
                 {displayResult.subtitle && (
-                  <div className="text-sm text-muted-foreground mb-4">
-                    {displayResult.subtitle}
-                  </div>
+                  <>
+                    <div className="text-sm text-muted-foreground mb-4">
+                      {displayResult.subtitle}
+                    </div>
+                    <div className="h-px bg-border w-32 mb-4"></div>
+                  </>
                 )}
                 <div className="text-base text-muted-foreground mb-4">
                   {amount} {fromUnitInput}
