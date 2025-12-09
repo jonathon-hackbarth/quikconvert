@@ -186,7 +186,7 @@ export function SimpleConverter() {
                       {displayResult.subtitle}
                     </div>
                     <div className="flex justify-center mb-3">
-                      <div className="h-px bg-border w-16"></div>
+                      <div className="h-0.5 bg-muted-foreground/40 w-16"></div>
                     </div>
                   </>
                 )}
@@ -222,7 +222,7 @@ export function SimpleConverter() {
                       {displayResult.subtitle}
                     </div>
                     <div className="flex justify-center mb-4">
-                      <div className="h-px bg-border w-32"></div>
+                      <div className="h-0.5 bg-muted-foreground/40 w-32"></div>
                     </div>
                   </>
                 )}
