@@ -155,8 +155,6 @@ export function formatAmount(
 
     // Build the main value
     let main: string;
-    const roundedIntPart = intPart + closestFraction.denominator;
-    const newIntPart = Math.floor(roundedIntPart / 1);
     
     if (closestFraction.denominator === 1) {
       // It's an integer
