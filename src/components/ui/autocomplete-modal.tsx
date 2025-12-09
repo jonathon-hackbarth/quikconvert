@@ -73,6 +73,12 @@ export const AutocompleteModal = React.forwardRef<
 
     // Handle keyboard navigation
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Close modal on Tab to allow focus to move to next element
+      if (e.key === "Tab") {
+        onClose();
+        return;
+      }
+
       if (!suggestions.length) {
         if (e.key === "Escape") {
           onClose();
@@ -115,87 +121,14 @@ export const AutocompleteModal = React.forwardRef<
 
     if (!isOpen) return null;
 
-    // On desktop, show a centered modal; on mobile, show full-screen modal
-    if (!isMobile) {
-      return (
-        <>
-          {/* Desktop: Backdrop with higher opacity */}
-          <div
-            ref={dialogRef}
-            onClick={handleBackdropClick}
-            className="fixed inset-0 z-40 bg-black/60"
-          >
-            {/* Desktop: Centered horizontally, fixed at top */}
-            <div className="fixed z-50 left-1/2 top-[10%] transform -translate-x-1/2 bg-background border-2 border-muted-foreground/25 rounded-lg shadow-lg w-[550px] h-[75vh] flex flex-col">
-              {/* Search Input with Clear Button */}
-              <div className="border-b border-input px-6 py-4">
-                <div className="relative">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={placeholder}
-                    className="w-full border-2 border-muted-foreground/25 rounded-lg px-3 py-2 pr-10 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                    autoComplete="off"
-                  />
-                  {value && (
-                    <button
-                      onClick={() => onChange("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
-                      aria-label="Clear input"
-                      tabIndex={-1}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Suggestions List */}
-              <div
-                ref={listRef}
-                className="overflow-y-auto flex-1"
-              >
-                {suggestions.length > 0 ? (
-                  suggestions.map((suggestion, index) => {
-                    const label = getSuggestionLabel(suggestion);
-                    return (
-                      <button
-                        key={label}
-                        data-index={index}
-                        onClick={() => onSuggestionSelect(suggestion)}
-                        className={`w-full text-left px-6 py-3 text-sm border-b border-border last:border-b-0 transition-colors ${
-                          index === highlightedIndex
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-accent"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="px-6 py-8 text-center text-muted-foreground text-sm">
-                    No suggestions found
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </>
-      );
-    }
-
     // Mobile: Full-screen modal
     return (
       <>
-        {/* Mobile Backdrop */}
+        {/* Modal Backdrop */}
         <div
           ref={dialogRef}
           onClick={handleBackdropClick}
-          className="fixed inset-0 z-50 bg-black/70 lg:hidden"
+          className={`fixed inset-0 z-50 ${isMobile ? 'bg-black/70' : 'bg-black/30'}`}
         >
           {/* Mobile Modal Container */}
           <div className="absolute inset-0 bg-background flex flex-col">
@@ -221,6 +154,7 @@ export const AutocompleteModal = React.forwardRef<
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onBlur={(e) => e.stopPropagation()}
                 placeholder={placeholder}
                 className="w-full border-2 border-muted-foreground/25 rounded-lg px-3 py-2 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                 autoComplete="off"
