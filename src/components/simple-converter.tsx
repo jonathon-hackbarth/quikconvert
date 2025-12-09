@@ -155,7 +155,15 @@ export function SimpleConverter() {
           ref={fromUnitInputRef}
           value={fromUnitInput}
           onChange={handleFromUnitChange}
-          onTabPressed={() => toUnitInputRef.current?.focus()}
+          onTabPressed={() => {
+            // If all fields are filled, close and show result (editing mode)
+            // Otherwise, move to next field
+            if (amount && toUnitInput && (showIngredientInput ? ingredientInput : true)) {
+              fromUnitInputRef.current?.blur();
+            } else {
+              toUnitInputRef.current?.focus();
+            }
+          }}
           options={unitOptions}
           placeholder="e.g., cups, lbs, teaspoon"
           label="What kind of measurement is it?"
@@ -168,7 +176,15 @@ export function SimpleConverter() {
           ref={toUnitInputRef}
           value={toUnitInput}
           onChange={handleToUnitChange}
-          onTabPressed={showIngredientInput ? () => ingredientInputRef.current?.focus() : undefined}
+          onTabPressed={() => {
+            // If ingredient input is needed, move to it; otherwise close if all filled
+            if (showIngredientInput) {
+              ingredientInputRef.current?.focus();
+            } else if (amount && fromUnitInput) {
+              // All required fields filled, close to show result
+              toUnitInputRef.current?.blur();
+            }
+          }}
           options={unitOptions}
           placeholder="e.g., oz, grams, celsius, lb"
           label="What do you want to convert it to?"
