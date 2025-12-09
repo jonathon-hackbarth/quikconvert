@@ -13,6 +13,7 @@ interface AutocompleteProps {
   placeholder?: string;
   label?: string;
   id?: string;
+  tabIndex?: number;
 }
 
 export const Autocomplete = React.forwardRef<
@@ -29,6 +30,7 @@ export const Autocomplete = React.forwardRef<
       placeholder = "",
       label = "",
       id = "",
+      tabIndex,
     },
     ref
   ) => {
@@ -68,6 +70,22 @@ export const Autocomplete = React.forwardRef<
 
     // Handle keyboard navigation
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Handle Tab key separately - should work regardless of dropdown state
+      if (e.key === "Tab") {
+        if (isOpen && suggestions.length > 0) {
+          e.preventDefault();
+          onChange(suggestions[highlightedIndex]);
+          setIsOpen(false);
+        }
+        // Call the tab pressed callback to move to next input
+        if (onTabPressed) {
+          setTimeout(() => {
+            onTabPressed();
+          }, 0);
+        }
+        return;
+      }
+
       if (!isOpen || suggestions.length === 0) {
         if (e.key === "ArrowDown") {
           e.preventDefault();
@@ -92,20 +110,6 @@ export const Autocomplete = React.forwardRef<
           if (suggestions.length > 0) {
             onChange(suggestions[highlightedIndex]);
             setIsOpen(false);
-          }
-          break;
-        case "Tab":
-          // Select current suggestion and move to next input
-          if (suggestions.length > 0) {
-            e.preventDefault();
-            onChange(suggestions[highlightedIndex]);
-            setIsOpen(false);
-            // Call the tab pressed callback to move to next input
-            if (onTabPressed) {
-              setTimeout(() => {
-                onTabPressed();
-              }, 0);
-            }
           }
           break;
         case "Escape":
@@ -164,6 +168,7 @@ export const Autocomplete = React.forwardRef<
             placeholder={placeholder}
             className="w-full px-4 py-3 pr-12 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
             autoComplete="off"
+            tabIndex={tabIndex}
           />
           {value && (
             <button
