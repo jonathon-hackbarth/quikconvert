@@ -36,10 +36,22 @@ export const Autocomplete = React.forwardRef<
     ref
   ) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const [suggestions, setSuggestions] = useState<(string | AutocompleteOption)[]>([]);
     const [highlightedIndex, setHighlightedIndex] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    // Detect mobile screen size
+    useEffect(() => {
+      const checkMobile = () => {
+        setIsMobile(window.innerWidth < 1024);
+      };
+      
+      checkMobile();
+      window.addEventListener("resize", checkMobile);
+      return () => window.removeEventListener("resize", checkMobile);
+    }, []);
 
     // Update suggestions when value changes
     useEffect(() => {
@@ -141,7 +153,7 @@ export const Autocomplete = React.forwardRef<
           </div>
         </div>
 
-        {/* Modal for suggestions */}
+        {/* Modal/Dropdown for suggestions */}
         <AutocompleteModal
           isOpen={isModalOpen}
           value={value}
@@ -153,6 +165,7 @@ export const Autocomplete = React.forwardRef<
           onSuggestionSelect={handleSuggestionClick}
           placeholder={placeholder}
           label={label}
+          isMobile={isMobile}
         />
       </>
     );

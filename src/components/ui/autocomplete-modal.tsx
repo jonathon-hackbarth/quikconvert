@@ -15,6 +15,7 @@ interface AutocompleteModalProps {
   onSuggestionSelect: (suggestion: string | AutocompleteOption) => void;
   placeholder?: string;
   label?: string;
+  isMobile?: boolean;
 }
 
 export const AutocompleteModal = React.forwardRef<
@@ -33,6 +34,7 @@ export const AutocompleteModal = React.forwardRef<
       onSuggestionSelect,
       placeholder = "",
       label = "",
+      isMobile = false,
     },
     ref
   ) => {
@@ -113,18 +115,80 @@ export const AutocompleteModal = React.forwardRef<
 
     if (!isOpen) return null;
 
+    // On desktop, show a dropdown list; on mobile, show full-screen modal
+    if (!isMobile) {
+      return (
+        <>
+          {/* Desktop: Backdrop with higher opacity */}
+          <div
+            ref={dialogRef}
+            onClick={handleBackdropClick}
+            className="fixed inset-0 z-40 bg-black/60"
+          />
+          
+          {/* Desktop: Dropdown list below input */}
+          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-background border-2 border-muted-foreground/25 rounded-lg shadow-lg overflow-hidden">
+            {/* Search Input */}
+            <div className="border-b border-input px-4 py-3">
+              <input
+                ref={inputRef}
+                type="text"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className="w-full border-2 border-muted-foreground/25 rounded-lg px-3 py-2 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                autoComplete="off"
+              />
+            </div>
+
+            {/* Suggestions List */}
+            <div
+              ref={listRef}
+              className="overflow-y-auto max-h-[400px]"
+            >
+              {suggestions.length > 0 ? (
+                suggestions.map((suggestion, index) => {
+                  const label = getSuggestionLabel(suggestion);
+                  return (
+                    <button
+                      key={label}
+                      data-index={index}
+                      onClick={() => onSuggestionSelect(suggestion)}
+                      className={`w-full text-left px-4 py-2 text-sm border-b border-border last:border-b-0 transition-colors ${
+                        index === highlightedIndex
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="px-4 py-8 text-center text-muted-foreground text-sm">
+                  No suggestions found
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    // Mobile: Full-screen modal
     return (
       <>
-        {/* Backdrop */}
+        {/* Mobile Backdrop */}
         <div
           ref={dialogRef}
           onClick={handleBackdropClick}
-          className="fixed inset-0 z-50 bg-black/50 lg:bg-black/30 lg:flex lg:items-center lg:justify-center"
+          className="fixed inset-0 z-50 bg-black/70 lg:hidden"
         >
-          {/* Modal Container */}
-          <div className="absolute inset-0 lg:inset-auto lg:relative lg:w-[550px] lg:max-h-[80vh] lg:rounded-lg lg:border lg:border-input lg:bg-background lg:shadow-lg">
+          {/* Mobile Modal Container */}
+          <div className="absolute inset-0 bg-background flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-input p-4 lg:border-b">
+            <div className="flex items-center justify-between border-b border-input p-4">
               <h2 className="text-lg font-semibold text-foreground">
                 {label ? `Select ${label.replace(/[?]/, "")}` : "Select option"}
               </h2>
@@ -154,8 +218,7 @@ export const AutocompleteModal = React.forwardRef<
             {/* Suggestions List */}
             <div
               ref={listRef}
-              className="overflow-y-auto"
-              style={{ maxHeight: "calc(80vh - 140px)" }}
+              className="overflow-y-auto flex-1"
             >
               {suggestions.length > 0 ? (
                 suggestions.map((suggestion, index) => {
@@ -165,7 +228,7 @@ export const AutocompleteModal = React.forwardRef<
                       key={label}
                       data-index={index}
                       onClick={() => onSuggestionSelect(suggestion)}
-                      className={`w-full text-left px-4 py-3 lg:py-2 text-base lg:text-sm border-b border-border last:border-b-0 transition-colors ${
+                      className={`w-full text-left px-4 py-3 text-base border-b border-border last:border-b-0 transition-colors ${
                         index === highlightedIndex
                           ? "bg-primary text-primary-foreground"
                           : "hover:bg-accent"
