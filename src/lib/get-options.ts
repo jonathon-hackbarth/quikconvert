@@ -35,7 +35,7 @@ export function getUnitOptions(): AutocompleteOption[] {
       const key = displayName.toLowerCase();
       if (!unitMap.has(key)) {
         unitMap.set(key, {
-          label: displayName,
+          label: displayName.toLowerCase(), // Display in lowercase for consistency
           value: unit, // Store the canonical unit for conversion
           aliases: aliases.length > 0 ? aliases : undefined,
         });
