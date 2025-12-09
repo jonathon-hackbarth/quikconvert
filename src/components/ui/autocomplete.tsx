@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { getAutocompleteSuggestions } from "@/lib/fuzzy-match";
+import { getAutocompleteSuggestions, type AutocompleteOption } from "@/lib/fuzzy-match";
 import { ChevronDown, X } from "lucide-react";
 
 interface AutocompleteProps {
@@ -9,7 +9,7 @@ interface AutocompleteProps {
   onChange: (value: string) => void;
   onBlur?: () => void;
   onTabPressed?: () => void;
-  options: string[];
+  options: (string | AutocompleteOption)[];
   placeholder?: string;
   label?: string;
   id?: string;
@@ -35,10 +35,11 @@ export const Autocomplete = React.forwardRef<
     ref
   ) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [suggestions, setSuggestions] = useState<(string | AutocompleteOption)[]>([]);
     const [highlightedIndex, setHighlightedIndex] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const shouldAutoOpenRef = useRef(true);
 
     // Update suggestions when value changes
     useEffect(() => {
@@ -46,7 +47,9 @@ export const Autocomplete = React.forwardRef<
         const newSuggestions = getAutocompleteSuggestions(value, options, 8);
         setSuggestions(newSuggestions);
         setHighlightedIndex(0);
-        setIsOpen(true);
+        if (shouldAutoOpenRef.current) {
+          setIsOpen(true);
+        }
       } else {
         setSuggestions([]);
         setIsOpen(false);
@@ -75,7 +78,7 @@ export const Autocomplete = React.forwardRef<
       if (e.key === "Tab" && !e.shiftKey) {
         if (isOpen && suggestions.length > 0) {
           e.preventDefault();
-          onChange(suggestions[highlightedIndex]);
+          handleSuggestionClick(suggestions[highlightedIndex]);
           setIsOpen(false);
         }
         // Call the tab pressed callback to move to next input
@@ -109,7 +112,7 @@ export const Autocomplete = React.forwardRef<
         case "Enter":
           e.preventDefault();
           if (suggestions.length > 0) {
-            onChange(suggestions[highlightedIndex]);
+            handleSuggestionClick(suggestions[highlightedIndex]);
             setIsOpen(false);
           }
           break;
@@ -133,10 +136,22 @@ export const Autocomplete = React.forwardRef<
       onBlur?.();
     };
 
-    const handleSuggestionClick = (suggestion: string) => {
-      onChange(suggestion);
+    const handleSuggestionClick = (suggestion: string | AutocompleteOption) => {
+      // Use label if it's an AutocompleteOption, otherwise use the string
+      const value = typeof suggestion === "string" ? suggestion : suggestion.label;
+      shouldAutoOpenRef.current = false;
+      onChange(value);
       setIsOpen(false);
       inputRef.current?.blur();
+      // Re-enable auto-open after a tick to allow blur to complete
+      setTimeout(() => {
+        shouldAutoOpenRef.current = true;
+      }, 0);
+    };
+
+    // Helper to get display label for a suggestion
+    const getSuggestionLabel = (suggestion: string | AutocompleteOption): string => {
+      return typeof suggestion === "string" ? suggestion : suggestion.label;
     };
 
     return (
@@ -189,19 +204,22 @@ export const Autocomplete = React.forwardRef<
 
         {isOpen && suggestions.length > 0 && (
           <div className="absolute z-50 w-full mt-2 bg-background border border-input rounded-lg shadow-lg overflow-hidden">
-            {suggestions.map((suggestion, index) => (
-              <button
-                key={suggestion}
-                onClick={() => handleSuggestionClick(suggestion)}
-                className={`w-full text-left px-4 py-3 hover:bg-accent transition-colors ${
-                  index === highlightedIndex
-                    ? "bg-primary text-primary-foreground"
-                    : ""
-                }`}
-              >
-                {suggestion}
-              </button>
-            ))}
+            {suggestions.map((suggestion, index) => {
+              const label = getSuggestionLabel(suggestion);
+              return (
+                <button
+                  key={label}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className={`w-full text-left px-4 py-3 hover:bg-accent transition-colors ${
+                    index === highlightedIndex
+                      ? "bg-primary text-primary-foreground"
+                      : ""
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

@@ -1,4 +1,13 @@
 /**
+ * Autocomplete option with display name and aliases for matching
+ */
+export interface AutocompleteOption {
+  label: string; // Display name shown to user
+  value: string; // Value sent to converter (for backward compatibility)
+  aliases?: string[]; // Alternative names for matching
+}
+
+/**
  * Fuzzy matching algorithm for autocomplete
  * Returns a score from 0 to 1, where 1 is a perfect match
  */
@@ -47,23 +56,55 @@ export function fuzzyScore(query: string, target: string): number {
 }
 
 /**
+ * Score an autocomplete option against a query
+ * Checks both label and aliases, returns best score
+ */
+function scoreOption(query: string, option: AutocompleteOption | string): number {
+  if (typeof option === "string") {
+    return fuzzyScore(query, option);
+  }
+
+  // Score against label
+  let bestScore = fuzzyScore(query, option.label);
+
+  // Score against aliases if present
+  if (option.aliases) {
+    for (const alias of option.aliases) {
+      const aliasScore = fuzzyScore(query, alias);
+      if (aliasScore > bestScore) {
+        bestScore = aliasScore;
+      }
+    }
+  }
+
+  return bestScore;
+}
+
+/**
  * Get sorted autocomplete suggestions
+ * Supports both string and AutocompleteOption formats
  */
 export function getAutocompleteSuggestions(
   query: string,
-  options: string[],
+  options: (string | AutocompleteOption)[],
   limit: number = 8
-): string[] {
+): (string | AutocompleteOption)[] {
   if (query.length === 0) {
     // Return first N options alphanumerically sorted
-    return options.sort().slice(0, limit);
+    return options
+      .sort((a, b) => {
+        const labelA = typeof a === "string" ? a : a.label;
+        const labelB = typeof b === "string" ? b : b.label;
+        return labelA.localeCompare(labelB);
+      })
+      .slice(0, limit);
   }
 
   // Score all options
   const scored = options
     .map((option) => ({
       option,
-      score: fuzzyScore(query, option),
+      score: scoreOption(query, option),
     }))
     .filter((item) => item.score > 0)
     .sort((a, b) => {
@@ -71,7 +112,9 @@ export function getAutocompleteSuggestions(
       if (Math.abs(a.score - b.score) > 0.001) {
         return b.score - a.score;
       }
-      return a.option.localeCompare(b.option);
+      const labelA = typeof a.option === "string" ? a.option : a.option.label;
+      const labelB = typeof b.option === "string" ? b.option : b.option.label;
+      return labelA.localeCompare(labelB);
     })
     .slice(0, limit);
 

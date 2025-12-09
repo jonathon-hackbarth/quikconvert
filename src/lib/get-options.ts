@@ -1,40 +1,70 @@
 import { unitDefinitions } from "@/constants/converters";
 import { ingredientDensities } from "@/constants/ingredients";
+import { type AutocompleteOption } from "@/lib/fuzzy-match";
 
-let cachedUnitOptions: string[] | null = null;
-let cachedIngredientOptions: string[] | null = null;
+let cachedUnitOptions: AutocompleteOption[] | null = null;
+let cachedIngredientOptions: AutocompleteOption[] | null = null;
 
 /**
  * Get all available unit options for autocomplete
+ * Returns deduplicated options with display names and aliases for matching
  */
-export function getUnitOptions(): string[] {
+export function getUnitOptions(): AutocompleteOption[] {
   if (cachedUnitOptions) return cachedUnitOptions;
 
-  const units = new Set<string>();
+  const unitMap = new Map<string, AutocompleteOption>();
 
-  // Add canonical units and their aliases
+  // Process each unit type
   for (const [, unitConfigs] of Object.entries(unitDefinitions)) {
     for (const [unit, config] of Object.entries(unitConfigs)) {
-      units.add(unit);
-      if ("aliases" in config && Array.isArray(config.aliases)) {
-        for (const alias of config.aliases) {
-          units.add(alias);
-        }
+      // Use displayName if available, otherwise use the unit key
+      const displayName =
+        "displayName" in config && config.displayName
+          ? config.displayName
+          : unit;
+
+      // Get aliases
+      const aliases =
+        "aliases" in config && Array.isArray(config.aliases)
+          ? config.aliases.filter(
+              (alias) => alias.toLowerCase() !== displayName.toLowerCase()
+            )
+          : [];
+
+      // Create option (use displayName as the key to avoid duplicates)
+      const key = displayName.toLowerCase();
+      if (!unitMap.has(key)) {
+        unitMap.set(key, {
+          label: displayName,
+          value: unit, // Store the canonical unit for conversion
+          aliases: aliases.length > 0 ? aliases : undefined,
+        });
       }
     }
   }
 
-  cachedUnitOptions = Array.from(units).sort();
+  // Convert to sorted array
+  cachedUnitOptions = Array.from(unitMap.values()).sort((a, b) =>
+    a.label.localeCompare(b.label)
+  );
   return cachedUnitOptions;
 }
 
 /**
  * Get all available ingredient options for autocomplete
+ * Returns options with ingredient names
  */
-export function getIngredientOptions(): string[] {
+export function getIngredientOptions(): AutocompleteOption[] {
   if (cachedIngredientOptions) return cachedIngredientOptions;
 
-  cachedIngredientOptions = Object.keys(ingredientDensities).sort();
+  const ingredients = Object.keys(ingredientDensities)
+    .map((name) => ({
+      label: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
+      value: name, // Store lowercase name for density lookup
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  cachedIngredientOptions = ingredients;
   return cachedIngredientOptions;
 }
 

@@ -5,6 +5,7 @@ import { parseAmount } from "@/lib/parse-amount";
 import { convert, type ConversionResult } from "@/lib/converter-utils";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { getUnitOptions, getIngredientOptions } from "@/lib/get-options";
+import { formatWithFraction } from "@/lib/format-fraction";
 import { X } from "lucide-react";
 
 export function SimpleConverter() {
@@ -79,16 +80,9 @@ export function SimpleConverter() {
       };
     }
 
-    // Format number nicely: remove trailing zeros and unnecessary decimal points
+    // Format number nicely with fraction approximation where sensible
     const num = result.result ?? 0;
-    let formatted: string;
-
-    if (Number.isInteger(num)) {
-      formatted = num.toString();
-    } else {
-      // Format with up to 10 decimal places, removing trailing zeros
-      formatted = parseFloat(num.toFixed(10)).toString();
-    }
+    const formatted = formatWithFraction(num);
 
     return {
       value: formatted,
