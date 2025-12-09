@@ -111,32 +111,35 @@ export function formatAmount(
       return Math.round(value).toString();
     }
 
-    // Try to find a good fraction match (max denominator 8 for cleaner fractions)
-    const maxDenom = 8;
+    // Try to find a good fraction match (max denominator 4)
+    // Possible fractions: 1/2, 1/3, 2/3, 1/4, 3/4
+    const possibleFractions: [number, number][] = [
+      [1, 2], // 0.5
+      [1, 3], // 0.333...
+      [2, 3], // 0.666...
+      [1, 4], // 0.25
+      [3, 4], // 0.75
+    ];
+
     const tolerance = 0.05; // 5% tolerance for matching
     
     let bestFraction: [number, number] | null = null;
     let bestError = Infinity;
 
-    // Check all fractions up to 8 as denominator
-    for (let denom = 2; denom <= maxDenom; denom++) {
-      for (let num = 1; num < denom; num++) {
-        const frac = num / denom;
-        const error = Math.abs(frac - decimalPart);
-        
-        // Prefer fractions with smaller denominators (simpler)
-        const errorAdjusted = error + (denom - 2) * 0.01;
-        
-        if (errorAdjusted < bestError) {
-          bestError = errorAdjusted;
-          bestFraction = [num, denom];
-        }
+    // Check all possible fractions
+    for (const [num, denom] of possibleFractions) {
+      const frac = num / denom;
+      const error = Math.abs(frac - decimalPart);
+      
+      if (error < bestError) {
+        bestError = error;
+        bestFraction = [num, denom];
       }
     }
 
     const rounded = parseFloat(value.toFixed(10));
     
-    // If we found a good match, use it
+    // If we found a good match (within tolerance), use it
     if (bestFraction && bestError < tolerance) {
       const [numerator, denominator] = bestFraction;
       
