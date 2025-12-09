@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef } from "react";
 import { parseAmount } from "@/lib/parse-amount";
-import { convert, type ConversionResult } from "@/lib/converter-utils";
+import { convert, type ConversionResult, resolveUnit } from "@/lib/converter-utils";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { getUnitOptions, getIngredientOptions } from "@/lib/get-options";
 import { formatAmount } from "@/lib/format-fraction";
@@ -18,6 +18,27 @@ export function SimpleConverter() {
   const fromUnitInputRef = useRef<HTMLInputElement>(null);
   const ingredientInputRef = useRef<HTMLInputElement>(null);
   const toUnitInputRef = useRef<HTMLInputElement>(null);
+
+  // Determine if ingredient input should be shown (only for weight <-> volume conversions)
+  const showIngredientInput = useMemo(() => {
+    if (!fromUnitInput || !toUnitInput) {
+      return false;
+    }
+
+    const fromResolved = resolveUnit(fromUnitInput);
+    const toResolved = resolveUnit(toUnitInput);
+
+    if (!fromResolved || !toResolved) {
+      return false;
+    }
+
+    // Show ingredient input only for weight <-> volume conversions
+    const isWeightVolumeConversion =
+      (fromResolved.type === "weight" && toResolved.type === "volume") ||
+      (fromResolved.type === "volume" && toResolved.type === "weight");
+
+    return isWeightVolumeConversion;
+  }, [fromUnitInput, toUnitInput]);
 
   // Perform conversion with both units together
   const conversionResult = useMemo(() => {
@@ -134,7 +155,7 @@ export function SimpleConverter() {
           ref={fromUnitInputRef}
           value={fromUnitInput}
           onChange={handleFromUnitChange}
-          onTabPressed={() => ingredientInputRef.current?.focus()}
+          onTabPressed={() => toUnitInputRef.current?.focus()}
           options={unitOptions}
           placeholder="e.g., cups, lbs, teaspoon"
           label="What kind of measurement is it?"
@@ -142,30 +163,32 @@ export function SimpleConverter() {
           tabIndex={2}
         />
 
-        {/* Ingredient Input (Optional) with Autocomplete */}
-        <Autocomplete
-          ref={ingredientInputRef}
-          value={ingredientInput}
-          onChange={handleIngredientChange}
-          onTabPressed={() => toUnitInputRef.current?.focus()}
-          options={ingredientOptions}
-          placeholder="e.g., flour, sugar, water (for density)"
-          label="What ingredient? (optional)"
-          id="ingredient-input"
-          tabIndex={3}
-        />
-
         {/* To Unit Input with Autocomplete */}
         <Autocomplete
           ref={toUnitInputRef}
           value={toUnitInput}
           onChange={handleToUnitChange}
+          onTabPressed={showIngredientInput ? () => ingredientInputRef.current?.focus() : undefined}
           options={unitOptions}
           placeholder="e.g., oz, grams, celsius, lb"
           label="What do you want to convert it to?"
           id="to-unit-input"
-          tabIndex={4}
+          tabIndex={3}
         />
+
+        {/* Ingredient Input (Optional) with Autocomplete - Only shown for weight <-> volume conversions */}
+        {showIngredientInput && (
+          <Autocomplete
+            ref={ingredientInputRef}
+            value={ingredientInput}
+            onChange={handleIngredientChange}
+            options={ingredientOptions}
+            placeholder="e.g., flour, sugar, water (for density)"
+            label="What ingredient? (optional)"
+            id="ingredient-input"
+            tabIndex={4}
+          />
+        )}
       </div>
 
       {/* Result Display - Mobile Only */}
