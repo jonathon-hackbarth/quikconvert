@@ -77,9 +77,11 @@ export const Autocomplete = React.forwardRef<
         if (onTabPressed) {
           setIsModalOpen(false);
           e.preventDefault();
+          // On mobile, focus immediately; on desktop, after brief delay
+          const delay = isMobile ? 0 : 0;
           setTimeout(() => {
             onTabPressed();
-          }, 0);
+          }, delay);
         }
         return;
       }
@@ -146,9 +148,11 @@ export const Autocomplete = React.forwardRef<
       
       // Then move focus to next field after a brief delay to ensure state updates
       if (onTabPressed) {
+        // On mobile, use shorter delay to show keyboard immediately
+        const delay = isMobile ? 0 : 50;
         setTimeout(() => {
           onTabPressed();
-        }, 50);
+        }, delay);
       } else {
         setTimeout(() => {
           inputRef.current?.blur();
