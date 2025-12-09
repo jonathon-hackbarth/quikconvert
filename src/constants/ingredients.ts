@@ -188,6 +188,45 @@ export const ingredientDensities: Record<string, number> = {
   "coconut milk": 227,
   "almond milk": 227,
   "oat milk": 227,
+
+  // Meats (ground/minced, raw)
+  "ground beef": 240,
+  "ground chicken": 220,
+  "ground turkey": 225,
+  "ground lamb": 240,
+  "ground pork": 235,
+  "ground veal": 220,
+  "ground sausage": 240,
+  "italian sausage": 240,
+
+  // Meats (cooked)
+  "cooked ground beef": 260,
+  "cooked ground chicken": 250,
+  "cooked ground turkey": 255,
+  "cooked ground lamb": 270,
+  "cooked ground pork": 260,
+
+  // Meats (whole cuts, raw - approximate per cup when chunked)
+  "beef chunks": 250,
+  "chicken breast": 240,
+  "turkey breast": 240,
+  "lamb chunks": 250,
+  "pork chunks": 245,
+
+  // Meats (cooked whole cuts)
+  "cooked beef chunks": 280,
+  "cooked chicken": 280,
+  "cooked turkey": 280,
+  "cooked lamb": 300,
+  "cooked pork": 280,
+
+  // Seafood
+  "ground fish": 220,
+  "salmon": 230,
+  "tuna": 240,
+  "cod": 220,
+  "shrimp": 220,
+  "crab": 220,
 };
 
 // Get ingredient density (grams per cup)
