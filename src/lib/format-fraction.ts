@@ -81,13 +81,12 @@ export function findClosestFraction(
 /**
  * Smart formatting based on unit system
  * - Metric: always decimal
- * - Imperial: use fractions (min 1/4), with decimal fallback for non-exact fractions
+ * - Imperial: use fractions with max denominator 4 (1/4 is smallest), with decimal fallback for non-exact fractions
  * - Temperature: decimal
  */
 export function formatAmount(
   value: number,
-  unit: string,
-  maxDenominator: number = 16
+  unit: string
 ): string {
   const unitSystem = getUnitSystem(unit);
 
@@ -102,52 +101,54 @@ export function formatAmount(
     return parseFloat(value.toFixed(10)).toString();
   }
 
-  // Imperial: use fractions (minimum 1/4)
+  // Imperial: use fractions (only halves and quarters: 1/4, 1/2, 3/4)
   if (unitSystem === "imperial") {
     const intPart = Math.floor(value);
     const decimalPart = value - intPart;
 
-    // Try to find exact fraction (min 1/4)
-    const fraction = findClosestFraction(decimalPart, maxDenominator, 0.25);
+    // Possible fractions: 1/4, 1/2, 3/4
+    const possibleFractions: [number, number][] = [
+      [1, 4], // 0.25
+      [1, 2], // 0.5
+      [3, 4], // 0.75
+    ];
 
-    if (fraction) {
-      const [numerator, denominator] = fraction;
+    // Try to find exact match (within tolerance)
+    const tolerance = 0.01;
+    for (const [num, denom] of possibleFractions) {
+      if (Math.abs(num / denom - decimalPart) < tolerance) {
+        if (intPart === 0) {
+          return `${num}/${denom}`;
+        } else {
+          return `${intPart} ${num}/${denom}`;
+        }
+      }
+    }
+
+    // No exact fraction found - show approximate fraction + decimal
+    // Find closest fraction
+    let bestFraction: [number, number] | null = null;
+    let bestError = Infinity;
+
+    for (const [num, denom] of possibleFractions) {
+      const error = Math.abs(num / denom - decimalPart);
+      if (error < bestError) {
+        bestError = error;
+        bestFraction = [num, denom];
+      }
+    }
+
+    const rounded = parseFloat(value.toFixed(10));
+    if (bestFraction) {
+      const [numerator, denominator] = bestFraction;
       if (intPart === 0) {
-        return `${numerator}/${denominator}`;
+        return `~${numerator}/${denominator} (${rounded})`;
       } else {
-        return `${intPart} ${numerator}/${denominator}`;
+        return `~${intPart} ${numerator}/${denominator} (${rounded})`;
       }
     } else {
-      // No exact fraction found - show approximate fraction + decimal
-      // Find the closest fraction >= 1/4 even if not that close
-      let bestFraction: [number, number] | null = null;
-      let bestError = Infinity;
-
-      for (let denominator = 1; denominator <= maxDenominator; denominator++) {
-        for (let numerator = 1; numerator < denominator; numerator++) {
-          const fraction = numerator / denominator;
-          // Only consider fractions >= 1/4
-          if (fraction < 0.25) continue;
-          const error = Math.abs(fraction - decimalPart);
-          if (error < bestError) {
-            bestError = error;
-            bestFraction = [numerator, denominator];
-          }
-        }
-      }
-
-      const rounded = parseFloat(value.toFixed(10));
-      if (bestFraction) {
-        const [numerator, denominator] = bestFraction;
-        if (intPart === 0) {
-          return `~${numerator}/${denominator} (${rounded})`;
-        } else {
-          return `~${intPart} ${numerator}/${denominator} (${rounded})`;
-        }
-      } else {
-        // Fallback to decimal only (for very small decimal parts)
-        return rounded.toString();
-      }
+      // Fallback to decimal only
+      return rounded.toString();
     }
   }
 
@@ -159,10 +160,7 @@ export function formatAmount(
  * Legacy function for backward compatibility
  * Use formatAmount() instead
  */
-export function formatWithFraction(
-  value: number,
-  maxDenominator: number = 16
-): string {
+export function formatWithFraction(value: number): string {
   // Default to imperial for this legacy function
-  return formatAmount(value, "cup", maxDenominator);
+  return formatAmount(value, "cup");
 }
