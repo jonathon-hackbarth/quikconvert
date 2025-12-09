@@ -113,7 +113,7 @@ export function SimpleConverter() {
               onChange={handleAmountChange}
               onKeyDown={handleAmountKeyDown}
               placeholder="e.g., 1.5 or 1 1/2"
-              className="w-full px-4 py-3 pr-12 text-lg border border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+              className="w-full px-4 py-3 pr-12 text-lg border-2 border-muted-foreground/25 rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
               tabIndex={1}
             />
             {amount && (

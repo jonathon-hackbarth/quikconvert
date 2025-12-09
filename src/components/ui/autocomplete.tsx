@@ -182,7 +182,7 @@ export const Autocomplete = React.forwardRef<
             onFocus={handleFocus}
             onBlur={handleBlur}
             placeholder={placeholder}
-            className="w-full px-4 py-3 pr-12 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+            className="w-full px-4 py-3 pr-12 rounded-lg border-2 border-muted-foreground/25 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
             autoComplete="off"
             tabIndex={tabIndex}
           />
