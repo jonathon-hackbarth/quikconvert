@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef } from "react";
 import { parseAmount } from "@/lib/parse-amount";
-import { convert } from "@/lib/converter-utils";
+import { convert, type ConversionResult } from "@/lib/converter-utils";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { getUnitOptions, getIngredientOptions } from "@/lib/get-options";
 import { X } from "lucide-react";
@@ -42,6 +42,17 @@ export function SimpleConverter() {
     []
   );
 
+  const handleAmountKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // On Enter key, move focus to the next input field (fromUnit)
+      if (e.key === "Enter") {
+        e.preventDefault();
+        fromUnitInputRef.current?.focus();
+      }
+    },
+    []
+  );
+
   const handleFromUnitChange = useCallback((value: string) => {
     setFromUnitInput(value);
   }, []);
@@ -58,15 +69,18 @@ export function SimpleConverter() {
   const displayResult = useMemo(() => {
     if (!conversionResult) return null;
 
-    if (conversionResult.error) {
+    const result = conversionResult as ConversionResult;
+
+    if (result.error) {
       return {
         value: null as string | null,
-        error: conversionResult.error,
+        error: result.error,
+        usesDefaultDensity: result.usesDefaultDensity,
       };
     }
 
     // Format number nicely: remove trailing zeros and unnecessary decimal points
-    const num = conversionResult.result ?? 0;
+    const num = result.result ?? 0;
     let formatted: string;
 
     if (Number.isInteger(num)) {
@@ -79,6 +93,7 @@ export function SimpleConverter() {
     return {
       value: formatted,
       error: null as string | null,
+      usesDefaultDensity: result.usesDefaultDensity,
     };
   }, [conversionResult]);
 
@@ -100,8 +115,10 @@ export function SimpleConverter() {
               type="text"
               value={amount}
               onChange={handleAmountChange}
+              onKeyDown={handleAmountKeyDown}
               placeholder="e.g., 1.5 or 1 1/2"
               className="w-full px-4 py-3 pr-12 text-lg border border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+              tabIndex={1}
             />
             {amount && (
               <button
@@ -127,6 +144,7 @@ export function SimpleConverter() {
           placeholder="e.g., cups, lbs, teaspoon"
           label="What kind of measurement is it?"
           id="from-unit-input"
+          tabIndex={2}
         />
 
         {/* Ingredient Input (Optional) with Autocomplete */}
@@ -139,6 +157,7 @@ export function SimpleConverter() {
           placeholder="e.g., flour, sugar, water (for density)"
           label="What ingredient? (optional)"
           id="ingredient-input"
+          tabIndex={3}
         />
 
         {/* To Unit Input with Autocomplete */}
@@ -150,6 +169,7 @@ export function SimpleConverter() {
           placeholder="e.g., oz, grams, celsius, lb"
           label="What do you want to convert it to?"
           id="to-unit-input"
+          tabIndex={4}
         />
 
         {/* Result Display - Mobile Only */}
@@ -167,6 +187,11 @@ export function SimpleConverter() {
                 <div className="text-sm text-muted-foreground">
                   {amount} {fromUnitInput} = {displayResult.value} {toUnitInput}
                 </div>
+                {displayResult.usesDefaultDensity && (
+                  <div className="mt-3 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 p-2 rounded">
+                    Note: Using standard average density (water: 227g/cup)
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -192,6 +217,11 @@ export function SimpleConverter() {
                 <div className="text-base text-muted-foreground">
                   {displayResult.value} {toUnitInput}
                 </div>
+                {displayResult.usesDefaultDensity && (
+                  <div className="mt-4 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950 p-3 rounded">
+                    Note: Using standard average density (water: 227g/cup)
+                  </div>
+                )}
               </div>
             )}
           </div>
