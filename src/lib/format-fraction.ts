@@ -101,53 +101,64 @@ export function formatAmount(
     return parseFloat(value.toFixed(10)).toString();
   }
 
-  // Imperial: use fractions (only halves and quarters: 1/4, 1/2, 3/4)
+  // Imperial: use fractions with smart rounding
   if (unitSystem === "imperial") {
     const intPart = Math.floor(value);
     const decimalPart = value - intPart;
 
-    // Possible fractions: 1/4, 1/2, 3/4
-    const possibleFractions: [number, number][] = [
-      [1, 4], // 0.25
-      [1, 2], // 0.5
-      [3, 4], // 0.75
-    ];
+    // If decimal part is very small (< 0.1) or very large (> 0.9), round to integer
+    if (decimalPart < 0.1 || decimalPart > 0.9) {
+      return Math.round(value).toString();
+    }
 
-    // Try to find exact match (within tolerance)
-    const tolerance = 0.01;
-    for (const [num, denom] of possibleFractions) {
-      if (Math.abs(num / denom - decimalPart) < tolerance) {
-        if (intPart === 0) {
-          return `${num}/${denom}`;
-        } else {
-          return `${intPart} ${num}/${denom}`;
+    // Try to find a good fraction match (max denominator 8 for cleaner fractions)
+    const maxDenom = 8;
+    const tolerance = 0.05; // 5% tolerance for matching
+    
+    let bestFraction: [number, number] | null = null;
+    let bestError = Infinity;
+
+    // Check all fractions up to 8 as denominator
+    for (let denom = 2; denom <= maxDenom; denom++) {
+      for (let num = 1; num < denom; num++) {
+        const frac = num / denom;
+        const error = Math.abs(frac - decimalPart);
+        
+        // Prefer fractions with smaller denominators (simpler)
+        const errorAdjusted = error + (denom - 2) * 0.01;
+        
+        if (errorAdjusted < bestError) {
+          bestError = errorAdjusted;
+          bestFraction = [num, denom];
         }
       }
     }
 
-    // No exact fraction found - show approximate fraction + decimal
-    // Find closest fraction
-    let bestFraction: [number, number] | null = null;
-    let bestError = Infinity;
-
-    for (const [num, denom] of possibleFractions) {
-      const error = Math.abs(num / denom - decimalPart);
-      if (error < bestError) {
-        bestError = error;
-        bestFraction = [num, denom];
-      }
-    }
-
     const rounded = parseFloat(value.toFixed(10));
-    if (bestFraction) {
+    
+    // If we found a good match, use it
+    if (bestFraction && bestError < tolerance) {
       const [numerator, denominator] = bestFraction;
-      if (intPart === 0) {
-        return `~${numerator}/${denominator} (${rounded})`;
+      
+      // Check if it's a very close match (within 1%)
+      const fracValue = numerator / denominator;
+      if (Math.abs(fracValue - decimalPart) < 0.01) {
+        // Exact match
+        if (intPart === 0) {
+          return `${numerator}/${denominator}`;
+        } else {
+          return `${intPart} ${numerator}/${denominator}`;
+        }
       } else {
-        return `~${intPart} ${numerator}/${denominator} (${rounded})`;
+        // Approximate match
+        if (intPart === 0) {
+          return `~${numerator}/${denominator} (${rounded})`;
+        } else {
+          return `~${intPart} ${numerator}/${denominator} (${rounded})`;
+        }
       }
     } else {
-      // Fallback to decimal only
+      // No good fraction found, return decimal
       return rounded.toString();
     }
   }
