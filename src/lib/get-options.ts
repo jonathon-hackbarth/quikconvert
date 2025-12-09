@@ -13,7 +13,7 @@ export function getUnitOptions(): string[] {
   const units = new Set<string>();
 
   // Add canonical units and their aliases
-  for (const [type, unitConfigs] of Object.entries(unitDefinitions)) {
+  for (const [, unitConfigs] of Object.entries(unitDefinitions)) {
     for (const [unit, config] of Object.entries(unitConfigs)) {
       units.add(unit);
       if ("aliases" in config && Array.isArray(config.aliases)) {

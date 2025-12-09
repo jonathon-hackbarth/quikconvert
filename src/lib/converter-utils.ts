@@ -26,20 +26,6 @@ export function resolveUnit(input: string): ResolvedUnit | null {
     return null;
   }
 
-  // Handle ambiguous units
-  if (aliasEntry.unit.startsWith("ambiguous:")) {
-    const ambigUnit = aliasEntry.unit.replace("ambiguous:", "") as keyof typeof ambiguousUnits;
-    const ambig = ambiguousUnits[ambigUnit];
-    if (ambig) {
-      return {
-        unit: ambig.default,
-        type: Object.keys(unitDefinitions).find(
-          (t) => unitDefinitions[t as keyof typeof unitDefinitions][ambig.default]
-        ) || "unknown",
-      };
-    }
-  }
-
   return aliasEntry;
 }
 
@@ -54,9 +40,9 @@ export function resolveUnitPair(
   const fromNorm = fromInput.toLowerCase().trim();
   const toNorm = toInput.toLowerCase().trim();
 
-  // First pass: try direct resolution
-  let fromEntry = aliasMap[fromNorm];
-  let toEntry = aliasMap[toNorm];
+  // Direct resolution from alias map
+  const fromEntry = aliasMap[fromNorm];
+  const toEntry = aliasMap[toNorm];
 
   if (!fromEntry) {
     return { error: `Unknown unit: ${fromInput}` };

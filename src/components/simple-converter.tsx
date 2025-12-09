@@ -14,7 +14,6 @@ export function SimpleConverter() {
   const [ingredientInput, setIngredientInput] = useState("");
 
   // Refs for managing Tab navigation
-  const amountInputRef = useRef<HTMLInputElement>(null);
   const fromUnitInputRef = useRef<HTMLInputElement>(null);
   const ingredientInputRef = useRef<HTMLInputElement>(null);
   const toUnitInputRef = useRef<HTMLInputElement>(null);
@@ -34,7 +33,7 @@ export function SimpleConverter() {
     }
 
     return convert(parsedAmount, fromUnitInput, toUnitInput, ingredientInput || undefined);
-  }, [amount, fromUnitInput, toUnitInput]);
+  }, [amount, fromUnitInput, toUnitInput, ingredientInput]);
 
   const handleAmountChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

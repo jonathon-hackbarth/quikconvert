@@ -111,7 +111,7 @@ export const ingredientDensities: Record<string, number> = {
 
 // Get ingredient density (grams per cup)
 // Defaults to water density if not found
-export function getIngredientDensity(ingredient: string): number {
+export function getIngredientDensity(ingredient?: string): number {
   if (!ingredient) return ingredientDensities.water;
   const normalized = ingredient.toLowerCase().trim();
   return ingredientDensities[normalized] ?? ingredientDensities.water;
