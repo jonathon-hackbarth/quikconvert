@@ -74,7 +74,8 @@ export function SimpleConverter() {
 
     if (result.error) {
       return {
-        value: null as string | null,
+        main: null as string | null,
+        subtitle: null as string | null,
         error: result.error,
         usesDefaultDensity: result.usesDefaultDensity,
       };
@@ -85,7 +86,8 @@ export function SimpleConverter() {
     const formatted = formatAmount(num, toUnitInput);
 
     return {
-      value: formatted,
+      main: formatted.main,
+      subtitle: formatted.subtitle || null,
       error: null as string | null,
       usesDefaultDensity: result.usesDefaultDensity,
     };
@@ -176,10 +178,15 @@ export function SimpleConverter() {
             ) : (
               <div className="text-center">
                 <div className="text-4xl font-bold text-primary mb-2">
-                  {displayResult.value}
+                  {displayResult.main}
                 </div>
+                {displayResult.subtitle && (
+                  <div className="text-xs text-muted-foreground mb-3">
+                    {displayResult.subtitle}
+                  </div>
+                )}
                 <div className="text-sm text-muted-foreground">
-                  {amount} {fromUnitInput} = {displayResult.value} {toUnitInput}
+                  {amount} {fromUnitInput} = {displayResult.main} {toUnitInput}
                 </div>
                 {displayResult.usesDefaultDensity && (
                   <div className="mt-4 text-xs text-muted-foreground bg-muted/50 border-l-2 border-muted-foreground/50 pl-3 pr-3 py-2 rounded-sm">
@@ -201,15 +208,20 @@ export function SimpleConverter() {
               </div>
             ) : (
               <div className="text-center">
-                <div className="text-5xl lg:text-6xl font-bold text-primary mb-4">
-                  {displayResult.value}
+                <div className="text-5xl lg:text-6xl font-bold text-primary mb-2">
+                  {displayResult.main}
                 </div>
-                <div className="text-base text-muted-foreground">
+                {displayResult.subtitle && (
+                  <div className="text-sm text-muted-foreground mb-4">
+                    {displayResult.subtitle}
+                  </div>
+                )}
+                <div className="text-base text-muted-foreground mb-4">
                   {amount} {fromUnitInput}
                 </div>
                 <div className="text-2xl text-primary my-2">=</div>
                 <div className="text-base text-muted-foreground">
-                  {displayResult.value} {toUnitInput}
+                  {displayResult.main} {toUnitInput}
                 </div>
                 {displayResult.usesDefaultDensity && (
                   <div className="mt-6 text-sm text-muted-foreground bg-muted/50 border-l-2 border-muted-foreground/50 pl-4 pr-4 py-3 rounded-sm">
