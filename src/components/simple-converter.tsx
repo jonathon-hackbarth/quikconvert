@@ -60,13 +60,13 @@ export function SimpleConverter() {
 
     if (conversionResult.error) {
       return {
-        value: null,
+        value: null as string | null,
         error: conversionResult.error,
       };
     }
 
     // Format number nicely: remove trailing zeros and unnecessary decimal points
-    const num = conversionResult.result;
+    const num = conversionResult.result ?? 0;
     let formatted: string;
 
     if (Number.isInteger(num)) {
@@ -78,7 +78,7 @@ export function SimpleConverter() {
 
     return {
       value: formatted,
-      error: null,
+      error: null as string | null,
     };
   }, [conversionResult]);
 

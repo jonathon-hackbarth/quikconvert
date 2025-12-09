@@ -106,7 +106,6 @@ export const ingredientDensities: Record<string, number> = {
   // Prepared/packaged
   applesauce: 255,
   "pumpkin puree": 227,
-  "peanut butter": 135, // per 1/2 cup
 };
 
 // Get ingredient density (grams per cup)
