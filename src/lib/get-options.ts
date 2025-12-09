@@ -52,14 +52,14 @@ export function getUnitOptions(): AutocompleteOption[] {
 
 /**
  * Get all available ingredient options for autocomplete
- * Returns options with ingredient names
+ * Returns options with ingredient names (all lowercase for consistency)
  */
 export function getIngredientOptions(): AutocompleteOption[] {
   if (cachedIngredientOptions) return cachedIngredientOptions;
 
   const ingredients = Object.keys(ingredientDensities)
     .map((name) => ({
-      label: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
+      label: name, // Keep lowercase for consistency
       value: name, // Store lowercase name for density lookup
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
