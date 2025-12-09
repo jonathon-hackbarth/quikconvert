@@ -116,72 +116,73 @@ export function formatAmount(
     const decimalPart = value - intPart;
     const exactDecimal = parseFloat(value.toFixed(10));
 
-    // If decimal part is >= 0.875 (7/8), round up to next integer
-    if (decimalPart >= 0.875) {
-      return { main: Math.round(value).toString() };
-    }
-
-    // Try to find a good fraction match (max denominator 4)
-    // Possible fractions: 1/2, 1/3, 2/3, 1/4, 3/4
-    const possibleFractions: [number, number][] = [
-      [1, 2], // 0.5
-      [1, 3], // 0.333...
-      [2, 3], // 0.666...
-      [1, 4], // 0.25
-      [3, 4], // 0.75
+    // Possible fractions (sorted by value): 0, 1/4, 1/3, 1/2, 2/3, 3/4, 1
+    // Thresholds (midpoints between fractions):
+    // 0 to 1/4: threshold at 0.125 (midpoint between 0 and 0.25)
+    // 1/4 to 1/3: threshold at 0.292 (midpoint between 0.25 and 0.333)
+    // 1/3 to 1/2: threshold at 0.417 (midpoint between 0.333 and 0.5)
+    // 1/2 to 2/3: threshold at 0.583 (midpoint between 0.5 and 0.667)
+    // 2/3 to 3/4: threshold at 0.708 (midpoint between 0.667 and 0.75)
+    // 3/4 to 1: threshold at 0.875 (midpoint between 0.75 and 1)
+    const fractionRanges: Array<{
+      value: number;
+      numerator: number;
+      denominator: number;
+      threshold: number;
+    }> = [
+      { value: 0, numerator: 0, denominator: 1, threshold: 0.125 },
+      { value: 0.25, numerator: 1, denominator: 4, threshold: 0.292 },
+      { value: 0.333, numerator: 1, denominator: 3, threshold: 0.417 },
+      { value: 0.5, numerator: 1, denominator: 2, threshold: 0.583 },
+      { value: 0.667, numerator: 2, denominator: 3, threshold: 0.708 },
+      { value: 0.75, numerator: 3, denominator: 4, threshold: 0.875 },
+      { value: 1, numerator: 1, denominator: 1, threshold: 1 },
     ];
 
-    const tolerance = 0.05; // 5% tolerance for matching
-    
-    let bestFraction: [number, number] | null = null;
-    let bestError = Infinity;
-
-    // Check all possible fractions
-    for (const [num, denom] of possibleFractions) {
-      const frac = num / denom;
-      const error = Math.abs(frac - decimalPart);
-      
-      if (error < bestError) {
-        bestError = error;
-        bestFraction = [num, denom];
+    // Find which range the decimal part falls into
+    let closestFraction = fractionRanges[0]; // default to 0
+    for (const range of fractionRanges) {
+      if (decimalPart < range.threshold) {
+        closestFraction = range;
+        break;
       }
     }
 
-    // If we found a good match (within tolerance), use it
-    if (bestFraction && bestError < tolerance) {
-      const [numerator, denominator] = bestFraction;
-      
-      // Check if it's a very close match (within 1%)
-      const fracValue = numerator / denominator;
-      const isExact = Math.abs(fracValue - decimalPart) < 0.01;
-      
-      let main: string;
+    // Check if it's an exact match (within 1%)
+    const fracValue = closestFraction.value;
+    const isExact = Math.abs(fracValue - decimalPart) < 0.01;
+    const isRounded = !isExact;
+
+    // Build the main value
+    let main: string;
+    const roundedIntPart = intPart + closestFraction.denominator;
+    const newIntPart = Math.floor(roundedIntPart / 1);
+    
+    if (closestFraction.denominator === 1) {
+      // It's an integer
+      main = (intPart + closestFraction.numerator).toString();
+    } else if (closestFraction.numerator === 0) {
+      // It's 0
       if (intPart === 0) {
-        main = `${numerator}/${denominator}`;
+        main = "0";
       } else {
-        main = `${intPart} ${numerator}/${denominator}`;
-      }
-      
-      // Show subtitle for non-exact matches
-      if (!isExact) {
-        return { main, subtitle: exactDecimal.toString() };
-      } else {
-        return { main };
+        main = intPart.toString();
       }
     } else {
-      // No good fraction found, round to nearest fraction and show exact decimal
-      let roundedFraction = bestFraction || [1, 2]; // default to 1/2
-      
-      const [numerator, denominator] = roundedFraction;
-      let main: string;
+      // It's a proper fraction
+      const prefix = isRounded ? "~" : "";
       if (intPart === 0) {
-        main = `${numerator}/${denominator}`;
+        main = `${prefix}${closestFraction.numerator}/${closestFraction.denominator}`;
       } else {
-        main = `${intPart} ${numerator}/${denominator}`;
+        main = `${prefix}${intPart} ${closestFraction.numerator}/${closestFraction.denominator}`;
       }
-      
-      // Always show subtitle when we had to round significantly
+    }
+
+    // Show subtitle when rounded
+    if (isRounded) {
       return { main, subtitle: exactDecimal.toString() };
+    } else {
+      return { main };
     }
   }
 
