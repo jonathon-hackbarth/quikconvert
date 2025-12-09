@@ -108,7 +108,7 @@ export const Autocomplete = React.forwardRef<
 
     return (
       <>
-        <div ref={containerRef} className="relative w-full">
+        <div ref={containerRef} className="relative w-full lg:w-full">
           {label && (
             <label
               htmlFor={id}

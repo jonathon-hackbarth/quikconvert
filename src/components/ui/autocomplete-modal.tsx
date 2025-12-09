@@ -115,7 +115,7 @@ export const AutocompleteModal = React.forwardRef<
 
     if (!isOpen) return null;
 
-    // On desktop, show a dropdown list; on mobile, show full-screen modal
+    // On desktop, show a centered modal; on mobile, show full-screen modal
     if (!isMobile) {
       return (
         <>
@@ -124,52 +124,64 @@ export const AutocompleteModal = React.forwardRef<
             ref={dialogRef}
             onClick={handleBackdropClick}
             className="fixed inset-0 z-40 bg-black/60"
-          />
-          
-          {/* Desktop: Dropdown list below input */}
-          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-background border-2 border-muted-foreground/25 rounded-lg shadow-lg overflow-hidden">
-            {/* Search Input */}
-            <div className="border-b border-input px-4 py-3">
-              <input
-                ref={inputRef}
-                type="text"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                className="w-full border-2 border-muted-foreground/25 rounded-lg px-3 py-2 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-                autoComplete="off"
-              />
-            </div>
-
-            {/* Suggestions List */}
-            <div
-              ref={listRef}
-              className="overflow-y-auto max-h-[400px]"
-            >
-              {suggestions.length > 0 ? (
-                suggestions.map((suggestion, index) => {
-                  const label = getSuggestionLabel(suggestion);
-                  return (
+          >
+            {/* Desktop: Centered horizontally, fixed at top */}
+            <div className="fixed z-50 left-1/2 top-[10%] transform -translate-x-1/2 bg-background border-2 border-muted-foreground/25 rounded-lg shadow-lg w-[550px] h-[75vh] flex flex-col">
+              {/* Search Input with Clear Button */}
+              <div className="border-b border-input px-6 py-4">
+                <div className="relative">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    className="w-full border-2 border-muted-foreground/25 rounded-lg px-3 py-2 pr-10 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                    autoComplete="off"
+                  />
+                  {value && (
                     <button
-                      key={label}
-                      data-index={index}
-                      onClick={() => onSuggestionSelect(suggestion)}
-                      className={`w-full text-left px-4 py-2 text-sm border-b border-border last:border-b-0 transition-colors ${
-                        index === highlightedIndex
-                          ? "bg-primary text-primary-foreground"
-                          : "hover:bg-accent"
-                      }`}
+                      onClick={() => onChange("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                      aria-label="Clear input"
+                      tabIndex={-1}
                     >
-                      {label}
+                      <X className="h-4 w-4" />
                     </button>
-                  );
-                })
-              ) : (
-                <div className="px-4 py-8 text-center text-muted-foreground text-sm">
-                  No suggestions found
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Suggestions List */}
+              <div
+                ref={listRef}
+                className="overflow-y-auto flex-1"
+              >
+                {suggestions.length > 0 ? (
+                  suggestions.map((suggestion, index) => {
+                    const label = getSuggestionLabel(suggestion);
+                    return (
+                      <button
+                        key={label}
+                        data-index={index}
+                        onClick={() => onSuggestionSelect(suggestion)}
+                        className={`w-full text-left px-6 py-3 text-sm border-b border-border last:border-b-0 transition-colors ${
+                          index === highlightedIndex
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-accent"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="px-6 py-8 text-center text-muted-foreground text-sm">
+                    No suggestions found
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </>
