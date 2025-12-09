@@ -5,7 +5,7 @@ import { parseAmount } from "@/lib/parse-amount";
 import { convert, type ConversionResult } from "@/lib/converter-utils";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { getUnitOptions, getIngredientOptions } from "@/lib/get-options";
-import { formatWithFraction } from "@/lib/format-fraction";
+import { formatAmount } from "@/lib/format-fraction";
 import { X } from "lucide-react";
 
 export function SimpleConverter() {
@@ -80,16 +80,16 @@ export function SimpleConverter() {
       };
     }
 
-    // Format number nicely with fraction approximation where sensible
+    // Format number based on unit system (metric vs imperial)
     const num = result.result ?? 0;
-    const formatted = formatWithFraction(num);
+    const formatted = formatAmount(num, toUnitInput);
 
     return {
       value: formatted,
       error: null as string | null,
       usesDefaultDensity: result.usesDefaultDensity,
     };
-  }, [conversionResult]);
+  }, [conversionResult, toUnitInput]);
 
   const unitOptions = getUnitOptions();
   const ingredientOptions = getIngredientOptions();
