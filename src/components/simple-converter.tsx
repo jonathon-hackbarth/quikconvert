@@ -76,15 +76,15 @@ export function SimpleConverter() {
   );
 
   const handleFromUnitChange = useCallback((value: string) => {
-    setFromUnitInput(value);
+    setFromUnitInput(value.toLowerCase());
   }, []);
 
   const handleToUnitChange = useCallback((value: string) => {
-    setToUnitInput(value);
+    setToUnitInput(value.toLowerCase());
   }, []);
 
   const handleIngredientChange = useCallback((value: string) => {
-    setIngredientInput(value);
+    setIngredientInput(value.toLowerCase());
   }, []);
 
   // Format result for display
