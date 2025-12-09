@@ -9,9 +9,10 @@ interface ResolvedUnit {
   type: string;
 }
 
-interface ConversionResult {
+export interface ConversionResult {
   result: number;
   error: string | null;
+  usesDefaultDensity: boolean;
 }
 
 /**
@@ -87,13 +88,14 @@ function linearConvert(
     return {
       result: 0,
       error: "Unit conversion factors not available",
+      usesDefaultDensity: false,
     };
   }
 
   const inBaseUnit = value * fromFactor;
   const result = inBaseUnit / toFactor;
 
-  return { result, error: null };
+  return { result, error: null, usesDefaultDensity: false };
 }
 
 /**
@@ -116,7 +118,13 @@ function weightToVolumeConvert(
   const cups = gramsResult.result / densityGramsPerCup;
 
   // Convert cups to target volume unit
-  return linearConvert(cups, "cup", toUnit, "volume");
+  const result = linearConvert(cups, "cup", toUnit, "volume");
+  
+  // Mark if default density was used (ingredient not specified)
+  return {
+    ...result,
+    usesDefaultDensity: !ingredient || ingredient.trim() === "",
+  };
 }
 
 /**
@@ -139,7 +147,13 @@ function volumeToWeightConvert(
   const grams = cupsResult.result * densityGramsPerCup;
 
   // Convert grams to target weight unit
-  return linearConvert(grams, "g", toUnit, "weight");
+  const result = linearConvert(grams, "g", toUnit, "weight");
+  
+  // Mark if default density was used (ingredient not specified)
+  return {
+    ...result,
+    usesDefaultDensity: !ingredient || ingredient.trim() === "",
+  };
 }
 
 /**
@@ -151,7 +165,7 @@ function temperatureConvert(
   toUnit: string
 ): ConversionResult {
   if (fromUnit === toUnit) {
-    return { result: value, error: null };
+    return { result: value, error: null, usesDefaultDensity: false };
   }
 
   const from = fromUnit.toLowerCase();
@@ -160,34 +174,34 @@ function temperatureConvert(
   // Celsius to other units
   if (from === "c") {
     if (to === "f") {
-      return { result: (value * 9) / 5 + 32, error: null };
+      return { result: (value * 9) / 5 + 32, error: null, usesDefaultDensity: false };
     }
     if (to === "k") {
-      return { result: value + 273.15, error: null };
+      return { result: value + 273.15, error: null, usesDefaultDensity: false };
     }
   }
 
   // Fahrenheit to other units
   if (from === "f") {
     if (to === "c") {
-      return { result: ((value - 32) * 5) / 9, error: null };
+      return { result: ((value - 32) * 5) / 9, error: null, usesDefaultDensity: false };
     }
     if (to === "k") {
-      return { result: ((value - 32) * 5) / 9 + 273.15, error: null };
+      return { result: ((value - 32) * 5) / 9 + 273.15, error: null, usesDefaultDensity: false };
     }
   }
 
   // Kelvin to other units
   if (from === "k") {
     if (to === "c") {
-      return { result: value - 273.15, error: null };
+      return { result: value - 273.15, error: null, usesDefaultDensity: false };
     }
     if (to === "f") {
-      return { result: ((value - 273.15) * 9) / 5 + 32, error: null };
+      return { result: ((value - 273.15) * 9) / 5 + 32, error: null, usesDefaultDensity: false };
     }
   }
 
-  return { result: 0, error: "Invalid temperature conversion" };
+  return { result: 0, error: "Invalid temperature conversion", usesDefaultDensity: false };
 }
 
 /**
@@ -205,13 +219,13 @@ export function convert(
 ): ConversionResult {
   // Validate inputs
   if (!fromInput || !toInput) {
-    return { result: 0, error: "Both units must be specified" };
+    return { result: 0, error: "Both units must be specified", usesDefaultDensity: false };
   }
 
   // Resolve units with context awareness
   const resolution = resolveUnitPair(fromInput, toInput);
   if ("error" in resolution) {
-    return { result: 0, error: resolution.error };
+    return { result: 0, error: resolution.error, usesDefaultDensity: false };
   }
 
   const { fromUnit, toUnit } = resolution;
