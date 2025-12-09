@@ -1,157 +1,110 @@
-import type { ConverterConfig } from "@/types";
-import {
-  createLinearConverter,
-  temperatureConvert,
-} from "@/lib/converter-utils";
+// Comprehensive unit conversion system with context-aware resolution
 
-const volumeFactors = {
-  tsp: 4.93,
-  tbsp: 14.79,
-  cup: 236.59,
-  floz: 29.57,
-  pint: 473.18,
-  quart: 946.35,
-  gallon: 3785.41,
-  ml: 1,
-  liter: 1000,
-  g: 1, // Using water density: 1 ml = 1 gram
-  kg: 1000, // Using water density: 1 ml = 1 gram
+// Unit definitions by type with conversion factors (base units shown)
+export const unitDefinitions = {
+  volume: {
+    // Base unit: ml
+    tsp: { factor: 4.929, aliases: ["teaspoon", "teaspoons"] },
+    tbsp: { factor: 14.787, aliases: ["tablespoon", "tablespoons"] },
+    floz: { factor: 29.574, aliases: ["fl oz", "fl. oz.", "fluid ounce", "fluid ounces", "oz"] },
+    cup: { factor: 236.588, aliases: ["cups", "c"] },
+    pint: { factor: 473.176, aliases: ["pints", "pt"] },
+    quart: { factor: 946.353, aliases: ["quarts", "qt"] },
+    gallon: { factor: 3785.41, aliases: ["gallons", "gal"] },
+    ml: { factor: 1, aliases: ["milliliter", "milliliters"] },
+    liter: { factor: 1000, aliases: ["liters", "l"] },
+  },
+  weight: {
+    // Base unit: g
+    mg: { factor: 0.001, aliases: ["milligram", "milligrams"] },
+    g: { factor: 1, aliases: ["gram", "grams"] },
+    kg: { factor: 1000, aliases: ["kilogram", "kilograms", "kilo"] },
+    "oz-weight": { factor: 28.3495, aliases: ["ounce", "ounces"] }, // Weight oz
+    lb: { factor: 453.592, aliases: ["lbs", "pound", "pounds"] },
+    ton: { factor: 1000000, aliases: ["tons", "tonne", "tonnes"] },
+  },
+  temperature: {
+    // Special handling - no base unit
+    f: { aliases: ["fahrenheit", "°f"] },
+    c: { aliases: ["celsius", "°c", "centigrade"] },
+    k: { aliases: ["kelvin", "°k", "kelvins"] },
+  },
+  length: {
+    // Base unit: cm
+    mm: { factor: 0.1, aliases: ["millimeter", "millimeters"] },
+    cm: { factor: 1, aliases: ["centimeter", "centimeters"] },
+    m: { factor: 100, aliases: ["meter", "meters"] },
+    km: { factor: 100000, aliases: ["kilometer", "kilometers"] },
+    in: { factor: 2.54, aliases: ["inch", "inches"] },
+    ft: { factor: 30.48, aliases: ["foot", "feet"] },
+    yd: { factor: 91.44, aliases: ["yard", "yards"] },
+    mi: { factor: 160934, aliases: ["mile", "miles"] },
+  },
+  area: {
+    // Base unit: sq meters
+    "sq m": { factor: 1, aliases: ["m²", "square meter", "square meters"] },
+    "sq cm": { factor: 0.0001, aliases: ["cm²", "square centimeter", "square centimeters"] },
+    "sq km": { factor: 1000000, aliases: ["km²", "square kilometer", "square kilometers"] },
+    "sq in": { factor: 0.00064516, aliases: ["in²", "square inch", "square inches"] },
+    "sq ft": { factor: 0.092903, aliases: ["ft²", "square foot", "square feet"] },
+    "sq yd": { factor: 0.836127, aliases: ["yd²", "square yard", "square yards"] },
+    acre: { factor: 4046.86, aliases: ["acres"] },
+    "sq mi": { factor: 2589988, aliases: ["mi²", "square mile", "square miles"] },
+    hectare: { factor: 10000, aliases: ["hectares", "ha"] },
+  },
+  speed: {
+    // Base unit: km/h
+    "km/h": { factor: 1, aliases: ["kmh", "kph", "kilometers per hour", "kilometer per hour"] },
+    mph: { factor: 1.60934, aliases: ["mi/h", "miles per hour", "mile per hour"] },
+    "m/s": { factor: 3.6, aliases: ["meters per second", "meter per second"] },
+    "ft/s": { factor: 1.09728, aliases: ["fps", "feet per second", "foot per second"] },
+    knot: { factor: 1.852, aliases: ["knots", "kn"] },
+  },
 };
 
-const weightFactors = {
-  oz: 28.35,
-  lb: 453.59,
-  g: 1,
-  kg: 1000,
-  ton: 1000000,
-};
+// Build complete alias map from unit definitions
+// Note: With autocomplete, ambiguous units like "c" and "oz" don't need special handling
+// Users will explicitly select from a list (e.g., "cup" or "celsius")
+export function buildAliasMap() {
+  const aliases: Record<string, { unit: string; type: string }> = {};
 
-const lengthFactors = {
-  inch: 2.54,
-  ft: 30.48,
-  yard: 91.44,
-  mile: 160934,
-  mm: 0.1,
-  cm: 1,
-  m: 100,
-  km: 100000,
-};
+  for (const [type, units] of Object.entries(unitDefinitions)) {
+    for (const [unit, config] of Object.entries(units)) {
+      // Add the unit itself
+      aliases[unit.toLowerCase()] = { unit, type };
 
-const areaFactors = {
-  sqin: 6.4516,
-  sqft: 929.03,
-  sqyd: 8361.27,
-  acre: 4046860,
-  sqmile: 25899881103.36,
-  sqcm: 1,
-  sqm: 10000,
-  hectare: 100000000,
-};
+      // Add all aliases
+      if ("aliases" in config) {
+        for (const alias of config.aliases) {
+          aliases[alias.toLowerCase()] = { unit, type };
+        }
+      }
+    }
+  }
 
-const speedFactors = {
-  mph: 1.60934,
-  fps: 1.09728,
-  kmh: 1,
-  ms: 3.6,
-  knot: 1.852,
-};
+  return aliases;
+}
 
-export const volumeConfig: ConverterConfig = {
-  title: "Volume Converter",
-  description: "Convert between common kitchen volume measurements",
-  defaultFromUnit: "tsp",
-  defaultToUnit: "tbsp",
-  options: [
-    { value: "tsp", label: "tsp" },
-    { value: "tbsp", label: "tbsp" },
-    { value: "cup", label: "cup" },
-    { value: "floz", label: "fl oz" },
-    { value: "pint", label: "pint" },
-    { value: "quart", label: "qt" },
-    { value: "gallon", label: "gal" },
-    { value: "ml", label: "ml" },
-    { value: "liter", label: "L" },
-    { value: "g", label: "g" },
-    { value: "kg", label: "kg" },
-  ],
-  calculate: createLinearConverter(volumeFactors),
-};
+export const aliasMap = buildAliasMap();
 
-export const weightConfig: ConverterConfig = {
-  title: "Weight Converter",
-  description: "Convert between common kitchen weight measurements",
-  defaultFromUnit: "oz",
-  defaultToUnit: "lb",
-  options: [
-    { value: "oz", label: "oz" },
-    { value: "lb", label: "lb" },
-    { value: "g", label: "g" },
-    { value: "kg", label: "kg" },
-    { value: "ton", label: "ton" },
-  ],
-  calculate: createLinearConverter(weightFactors),
-};
+// Get all unit types
+export function getUnitTypes(): string[] {
+  return Object.keys(unitDefinitions);
+}
 
-export const temperatureConfig: ConverterConfig = {
-  title: "Temperature Converter",
-  description: "Convert between Fahrenheit and Celsius",
-  defaultFromUnit: "f",
-  defaultToUnit: "c",
-  defaultValue: "70",
-  options: [
-    { value: "f", label: "°F" },
-    { value: "c", label: "°C" },
-  ],
-  calculate: temperatureConvert,
-};
+// Get all units of a specific type
+export function getUnitsOfType(type: string): string[] {
+  return Object.keys(unitDefinitions[type as keyof typeof unitDefinitions] || {});
+}
 
-export const lengthConfig: ConverterConfig = {
-  title: "Length Converter",
-  description: "Convert between common length measurements",
-  defaultFromUnit: "inch",
-  defaultToUnit: "cm",
-  options: [
-    { value: "inch", label: "in" },
-    { value: "ft", label: "ft" },
-    { value: "yard", label: "yd" },
-    { value: "mile", label: "mi" },
-    { value: "mm", label: "mm" },
-    { value: "cm", label: "cm" },
-    { value: "m", label: "m" },
-    { value: "km", label: "km" },
-  ],
-  calculate: createLinearConverter(lengthFactors),
-};
-
-export const areaConfig: ConverterConfig = {
-  title: "Area Converter",
-  description: "Convert between common area measurements",
-  defaultFromUnit: "sqft",
-  defaultToUnit: "sqm",
-  options: [
-    { value: "sqin", label: "in²" },
-    { value: "sqft", label: "ft²" },
-    { value: "sqyd", label: "yd²" },
-    { value: "acre", label: "acre" },
-    { value: "sqmile", label: "mi²" },
-    { value: "sqcm", label: "cm²" },
-    { value: "sqm", label: "m²" },
-    { value: "hectare", label: "ha" },
-  ],
-  calculate: createLinearConverter(areaFactors),
-};
-
-export const speedConfig: ConverterConfig = {
-  title: "Speed Converter",
-  description: "Convert between common speed measurements",
-  defaultFromUnit: "mph",
-  defaultToUnit: "kmh",
-  options: [
-    { value: "mph", label: "mph" },
-    { value: "fps", label: "ft/s" },
-    { value: "kmh", label: "km/h" },
-    { value: "ms", label: "m/s" },
-    { value: "knot", label: "knot" },
-  ],
-  calculate: createLinearConverter(speedFactors),
-};
+// Get conversion factor for a unit
+export function getUnitFactor(
+  unit: string,
+  type: string
+): number | undefined {
+  const typeUnits = unitDefinitions[type as keyof typeof unitDefinitions];
+  if (!typeUnits) return undefined;
+  const unitConfig = typeUnits[unit as keyof typeof typeUnits];
+  if (!unitConfig || !("factor" in unitConfig)) return undefined;
+  return (unitConfig as { factor: number }).factor;
+}
