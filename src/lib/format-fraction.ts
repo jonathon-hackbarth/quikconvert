@@ -116,6 +116,11 @@ export function formatAmount(
     const decimalPart = value - intPart;
     const exactDecimal = parseFloat(value.toFixed(10));
 
+    // If decimal part is >= 0.875 (7/8), round up to next integer
+    if (decimalPart >= 0.875) {
+      return { main: Math.round(value).toString() };
+    }
+
     // Try to find a good fraction match (max denominator 4)
     // Possible fractions: 1/2, 1/3, 2/3, 1/4, 3/4
     const possibleFractions: [number, number][] = [
