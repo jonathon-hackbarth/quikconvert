@@ -53,16 +53,22 @@ export function getUnitSystem(unit: string): UnitSystem {
 /**
  * Find the closest fraction match for a decimal value
  * Returns [numerator, denominator] or null if no good match
+ * minFraction: minimum fraction size (e.g., 0.25 for 1/4)
  */
 export function findClosestFraction(
   decimalPart: number,
-  maxDenominator: number = 16
+  maxDenominator: number = 16,
+  minFraction: number = 0.01
 ): [number, number] | null {
   const tolerance = 1 / (maxDenominator * maxDenominator);
 
+  // Prioritize by denominator (smaller denominators first for simpler fractions)
+  // but still respect minFraction constraint
   for (let denominator = 1; denominator <= maxDenominator; denominator++) {
     for (let numerator = 1; numerator < denominator; numerator++) {
       const fraction = numerator / denominator;
+      // Skip fractions smaller than minFraction
+      if (fraction < minFraction) continue;
       if (Math.abs(fraction - decimalPart) < tolerance) {
         return [numerator, denominator];
       }
@@ -75,7 +81,7 @@ export function findClosestFraction(
 /**
  * Smart formatting based on unit system
  * - Metric: always decimal
- * - Imperial: use fractions, with decimal fallback for non-exact fractions
+ * - Imperial: use fractions (min 1/4), with decimal fallback for non-exact fractions
  * - Temperature: decimal
  */
 export function formatAmount(
@@ -96,13 +102,13 @@ export function formatAmount(
     return parseFloat(value.toFixed(10)).toString();
   }
 
-  // Imperial: use fractions
+  // Imperial: use fractions (minimum 1/4)
   if (unitSystem === "imperial") {
     const intPart = Math.floor(value);
     const decimalPart = value - intPart;
 
-    // Try to find exact fraction
-    const fraction = findClosestFraction(decimalPart, maxDenominator);
+    // Try to find exact fraction (min 1/4)
+    const fraction = findClosestFraction(decimalPart, maxDenominator, 0.25);
 
     if (fraction) {
       const [numerator, denominator] = fraction;
@@ -113,13 +119,15 @@ export function formatAmount(
       }
     } else {
       // No exact fraction found - show approximate fraction + decimal
-      // Find the closest fraction even if not that close
+      // Find the closest fraction >= 1/4 even if not that close
       let bestFraction: [number, number] | null = null;
       let bestError = Infinity;
 
       for (let denominator = 1; denominator <= maxDenominator; denominator++) {
         for (let numerator = 1; numerator < denominator; numerator++) {
           const fraction = numerator / denominator;
+          // Only consider fractions >= 1/4
+          if (fraction < 0.25) continue;
           const error = Math.abs(fraction - decimalPart);
           if (error < bestError) {
             bestError = error;
@@ -137,7 +145,7 @@ export function formatAmount(
           return `~${intPart} ${numerator}/${denominator} (${rounded})`;
         }
       } else {
-        // Fallback to decimal only
+        // Fallback to decimal only (for very small decimal parts)
         return rounded.toString();
       }
     }
