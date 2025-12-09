@@ -71,7 +71,8 @@ export const Autocomplete = React.forwardRef<
     // Handle keyboard navigation
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       // Handle Tab key separately - should work regardless of dropdown state
-      if (e.key === "Tab") {
+      // Only handle Tab (not Shift+Tab which should go backward)
+      if (e.key === "Tab" && !e.shiftKey) {
         if (isOpen && suggestions.length > 0) {
           e.preventDefault();
           onChange(suggestions[highlightedIndex]);
