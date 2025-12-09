@@ -97,10 +97,9 @@ export function SimpleConverter() {
   const ingredientOptions = getIngredientOptions();
 
   return (
-    <div className="w-full">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 px-4 lg:px-8">
-        {/* Inputs Column */}
-        <div className="space-y-6">
+    <div className="w-full flex flex-col-reverse lg:grid lg:grid-cols-2 lg:gap-8 lg:gap-12">
+      {/* Inputs Column */}
+      <div className="space-y-6 px-4 lg:px-8 lg:px-0">
         {/* Amount Input */}
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-foreground">
@@ -167,10 +166,11 @@ export function SimpleConverter() {
           id="to-unit-input"
           tabIndex={4}
         />
+      </div>
 
-        {/* Result Display - Mobile Only */}
-        {displayResult && (
-          <div className="lg:hidden pt-4 border-t border-border">
+      {/* Result Display - Mobile Only */}
+      {displayResult && (
+        <div className="lg:hidden px-4 pb-4 lg:pb-0">
             {displayResult.error ? (
               <div className="text-destructive text-sm font-medium">
                 {displayResult.error}
@@ -200,13 +200,12 @@ export function SimpleConverter() {
                 )}
               </div>
             )}
-          </div>
-        )}
         </div>
+      )}
 
-        {/* Result Column - Desktop Only */}
-        {displayResult && (
-          <div className="hidden lg:flex flex-col justify-center items-center">
+      {/* Result Column - Desktop Only */}
+      {displayResult && (
+        <div className="hidden lg:flex flex-col justify-center items-center lg:px-0">
             {displayResult.error ? (
               <div className="text-destructive text-sm font-medium text-center px-4">
                 {displayResult.error}
@@ -240,9 +239,8 @@ export function SimpleConverter() {
                 )}
               </div>
             )}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
