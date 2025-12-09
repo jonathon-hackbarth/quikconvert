@@ -185,7 +185,9 @@ export function SimpleConverter() {
                     <div className="text-xs text-muted-foreground mb-3">
                       {displayResult.subtitle}
                     </div>
-                    <div className="h-px bg-border mb-3"></div>
+                    <div className="flex justify-center mb-3">
+                      <div className="h-px bg-border w-16"></div>
+                    </div>
                   </>
                 )}
                 <div className="text-sm text-muted-foreground">
@@ -219,7 +221,9 @@ export function SimpleConverter() {
                     <div className="text-sm text-muted-foreground mb-4">
                       {displayResult.subtitle}
                     </div>
-                    <div className="h-px bg-border w-32 mb-4"></div>
+                    <div className="flex justify-center mb-4">
+                      <div className="h-px bg-border w-32"></div>
+                    </div>
                   </>
                 )}
                 <div className="text-base text-muted-foreground mb-4">
