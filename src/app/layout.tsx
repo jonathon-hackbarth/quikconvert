@@ -51,7 +51,7 @@ export const metadata: Metadata = {
       "Fast kitchen and cooking converter for recipes, baking, and meal prep. Convert cups to ml, ounces to grams, Fahrenheit to Celsius instantly.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/me-image",
         width: 1200,
         height: 630,
         alt: "quikconvert",
@@ -64,6 +64,7 @@ export const metadata: Metadata = {
     description:
       "Convert cooking measurements instantly - cups to ml, ounces to grams, Fahrenheit to Celsius.",
     creator: "@jonathonhackbarth",
+    images: ["/me-image"],
   },
   alternates: {
     canonical: "https://quikconvert.app",

@@ -124,7 +124,7 @@ export function SimpleConverter() {
         {/* Amount Input */}
         <div className="space-y-2">
           <label className="block text-sm font-semibold text-foreground">
-            How much do you have?
+            how much do you have?
           </label>
           <div className="relative">
             <input
@@ -166,7 +166,7 @@ export function SimpleConverter() {
           }}
           options={unitOptions}
           placeholder="e.g., cups, lbs, teaspoon"
-          label="What kind of measurement is it?"
+          label="what kind of measurement is it?"
           id="from-unit-input"
           tabIndex={2}
         />
@@ -187,7 +187,7 @@ export function SimpleConverter() {
           }}
           options={unitOptions}
           placeholder="e.g., oz, grams, celsius, lb"
-          label="What do you want to convert it to?"
+          label="what do you want to convert it to?"
           id="to-unit-input"
           tabIndex={3}
         />
@@ -200,7 +200,7 @@ export function SimpleConverter() {
             onChange={handleIngredientChange}
             options={ingredientOptions}
             placeholder="e.g., flour, sugar, water (for density)"
-            label="What ingredient? (optional)"
+            label="what ingredient? (optional)"
             id="ingredient-input"
             tabIndex={4}
           />

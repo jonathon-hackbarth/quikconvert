@@ -5,7 +5,6 @@
 
 export function getSchemaMarkup() {
   return {
-    "@context": "https://schema.org",
     "@type": "WebApplication",
     name: "quikconvert",
     description:
@@ -25,11 +24,6 @@ export function getSchemaMarkup() {
       "@type": "Person",
       name: "Jonathan Hackbarth",
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "5",
-      ratingCount: "1",
-    },
     keywords: [
       "kitchen converter",
       "cooking converter",
@@ -43,7 +37,6 @@ export function getSchemaMarkup() {
 export function getConverterSchemaMarkup() {
   return [
     {
-      "@context": "https://schema.org",
       "@type": "HowTo",
       name: "How to Convert Cooking Measurements",
       description:

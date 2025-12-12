@@ -11,7 +11,7 @@ export function BuyMeCoffee() {
         className="flex items-center gap-2 px-4 py-1 rounded-md bg-[#FFDD00] hover:bg-[#FFDD00]/90 text-black font-medium transition-colors"
       >
         <Coffee className="h-4 w-4" />
-        <span>Donate</span>
+        <span>donate</span>
       </Link>
     </div>
   );
