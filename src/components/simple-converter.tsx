@@ -6,6 +6,7 @@ import { convert, type ConversionResult, resolveUnit } from "@/lib/converter-uti
 import { Autocomplete } from "@/components/ui/autocomplete";
 import { getUnitOptions, getIngredientOptions } from "@/lib/get-options";
 import { formatAmount } from "@/lib/format-fraction";
+import { getIngredientDensity } from "@/constants/ingredients";
 import { X } from "lucide-react";
 
 export function SimpleConverter() {
@@ -19,8 +20,8 @@ export function SimpleConverter() {
   const ingredientInputRef = useRef<HTMLInputElement>(null);
   const toUnitInputRef = useRef<HTMLInputElement>(null);
 
-  // Determine if ingredient input should be shown (only for weight <-> volume conversions)
-  const showIngredientInput = useMemo(() => {
+  // Determine if ingredient input is relevant (weight <-> volume conversions)
+  const isWeightVolumeConversion = useMemo(() => {
     if (!fromUnitInput || !toUnitInput) {
       return false;
     }
@@ -32,12 +33,11 @@ export function SimpleConverter() {
       return false;
     }
 
-    // Show ingredient input only for weight <-> volume conversions
-    const isWeightVolumeConversion =
+    // Check if this is a weight <-> volume conversion
+    return (
       (fromResolved.type === "weight" && toResolved.type === "volume") ||
-      (fromResolved.type === "volume" && toResolved.type === "weight");
-
-    return isWeightVolumeConversion;
+      (fromResolved.type === "volume" && toResolved.type === "weight")
+    );
   }, [fromUnitInput, toUnitInput]);
 
   // Perform conversion with both units together
@@ -99,6 +99,8 @@ export function SimpleConverter() {
         subtitle: null as string | null,
         error: result.error,
         usesDefaultDensity: result.usesDefaultDensity,
+        isWeightVolumeConversion,
+        ingredientName: ingredientInput || "water",
       };
     }
 
@@ -111,11 +113,24 @@ export function SimpleConverter() {
       subtitle: formatted.subtitle || null,
       error: null as string | null,
       usesDefaultDensity: result.usesDefaultDensity,
+      isWeightVolumeConversion,
+      ingredientName: ingredientInput || "water",
     };
-  }, [conversionResult, toUnitInput]);
+  }, [conversionResult, toUnitInput, isWeightVolumeConversion, ingredientInput]);
 
   const unitOptions = getUnitOptions();
   const ingredientOptions = getIngredientOptions();
+
+  // Get density message for display
+  const getDensityMessage = useCallback(() => {
+    if (!isWeightVolumeConversion) return null;
+    
+    const ingredientName = ingredientInput || "water";
+    const density = getIngredientDensity(ingredientInput);
+    const displayName = ingredientInput ? ingredientInput : "standard water";
+    
+    return `Using ${displayName} density (${density}g/cup)`;
+  }, [isWeightVolumeConversion, ingredientInput]);
 
   return (
     <div className="w-full flex flex-col-reverse lg:grid lg:grid-cols-2 lg:gap-8 lg:gap-12">
@@ -158,7 +173,7 @@ export function SimpleConverter() {
           onTabPressed={() => {
             // If all fields are filled, close and show result (editing mode)
             // Otherwise, move to next field
-            if (amount && toUnitInput && (showIngredientInput ? ingredientInput : true)) {
+            if (amount && toUnitInput) {
               fromUnitInputRef.current?.blur();
             } else {
               toUnitInputRef.current?.focus();
@@ -177,12 +192,13 @@ export function SimpleConverter() {
           value={toUnitInput}
           onChange={handleToUnitChange}
           onTabPressed={() => {
-            // If ingredient input is needed, move to it; otherwise close if all filled
-            if (showIngredientInput) {
-              ingredientInputRef.current?.focus();
-            } else if (amount && fromUnitInput) {
-              // All required fields filled, close to show result
-              toUnitInputRef.current?.blur();
+            // Move to ingredient input if it's relevant, otherwise close if all filled
+            if (amount && fromUnitInput) {
+              if (isWeightVolumeConversion) {
+                ingredientInputRef.current?.focus();
+              } else {
+                toUnitInputRef.current?.blur();
+              }
             }
           }}
           options={unitOptions}
@@ -192,19 +208,32 @@ export function SimpleConverter() {
           tabIndex={3}
         />
 
-        {/* Ingredient Input (Optional) with Autocomplete - Only shown for weight <-> volume conversions */}
-        {showIngredientInput && (
+        {/* Ingredient Input (Optional) with Autocomplete - Always visible, highlighted for weight <-> volume conversions */}
+        <div className="space-y-2">
           <Autocomplete
             ref={ingredientInputRef}
             value={ingredientInput}
             onChange={handleIngredientChange}
             options={ingredientOptions}
             placeholder="e.g., flour, sugar, water (for density)"
-            label="what ingredient? (optional)"
+            label={
+              isWeightVolumeConversion
+                ? "what ingredient? (optional, for accurate weight ↔ volume conversion)"
+                : "what ingredient? (optional, only used for weight ↔ volume)"
+            }
             id="ingredient-input"
             tabIndex={4}
           />
-        )}
+          {isWeightVolumeConversion && ingredientInput && (
+            <button
+              type="button"
+              onClick={() => setIngredientInput("")}
+              className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
+            >
+              Skip ingredient (use default density)
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Result Display - Mobile Only */}
@@ -232,9 +261,9 @@ export function SimpleConverter() {
                 <div className="text-sm text-muted-foreground">
                   {amount} {fromUnitInput} = {displayResult.main} {toUnitInput}
                 </div>
-                {displayResult.usesDefaultDensity && (
-                  <div className="mt-4 text-xs text-muted-foreground bg-muted/50 border-l-2 border-muted-foreground/50 pl-3 pr-3 py-2 rounded-sm">
-                    <span className="font-medium">ℹ</span> Using standard water density (227g/cup)
+                {displayResult.isWeightVolumeConversion && (
+                  <div className="mt-4 text-xs text-muted-foreground bg-muted/50 border-l-2 border-primary/50 pl-3 pr-3 py-2 rounded-sm">
+                    <span className="font-medium">ℹ</span> {getDensityMessage()}
                   </div>
                 )}
               </div>
@@ -271,9 +300,9 @@ export function SimpleConverter() {
                 <div className="text-base text-muted-foreground">
                   {displayResult.main} {toUnitInput}
                 </div>
-                {displayResult.usesDefaultDensity && (
-                  <div className="mt-6 text-sm text-muted-foreground bg-muted/50 border-l-2 border-muted-foreground/50 pl-4 pr-4 py-3 rounded-sm">
-                    <span className="font-medium">ℹ</span> Using standard water density (227g/cup)
+                {displayResult.isWeightVolumeConversion && (
+                  <div className="mt-6 text-sm text-muted-foreground bg-muted/50 border-l-2 border-primary/50 pl-4 pr-4 py-3 rounded-sm">
+                    <span className="font-medium">ℹ</span> {getDensityMessage()}
                   </div>
                 )}
               </div>
