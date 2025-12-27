@@ -11,19 +11,22 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://quikconvert.app"),
-  title: "quikconvert - Volume, Weight, Temperature & Measurements",
+  title: "quikconvert - Convert Cups to Grams | Recipe Volume to Weight Converter",
   description:
-    "Fast kitchen and cooking converter for recipes, baking, and meal prep. Convert cups to ml, ounces to grams, Fahrenheit to Celsius instantly.",
+    "Convert recipe measurements from cups, tablespoons & teaspoons to grams for food scales. Perfect for baking by weight. Convert 1/3 cup to grams, 2 tbsp to grams & more instantly.",
   keywords: [
-    "kitchen converter",
-    "cooking converter",
+    "cups to grams",
+    "tablespoons to grams",
+    "teaspoons to grams",
+    "convert cups to grams",
     "recipe converter",
-    "baking converter",
-    "cooking measurements",
+    "food scale converter",
+    "baking by weight",
+    "volume to weight converter",
+    "1/3 cup to grams",
+    "kitchen scale measurements",
+    "cooking converter",
     "ingredient converter",
-    "volume converter",
-    "weight converter",
-    "temperature converter",
     "measurement converter",
   ],
   authors: [{ name: "Jonathan Hackbarth" }],
@@ -46,9 +49,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://quikconvert.app",
     siteName: "quikconvert",
-    title: "quikconvert - Volume, Weight, Temperature & Measurements",
+    title: "quikconvert - Convert Cups to Grams | Recipe Volume to Weight Converter",
     description:
-      "Fast kitchen and cooking converter for recipes, baking, and meal prep. Convert cups to ml, ounces to grams, Fahrenheit to Celsius instantly.",
+      "Convert recipe measurements from cups, tablespoons & teaspoons to grams for food scales. Perfect for baking by weight with instant conversions.",
     images: [
       {
         url: "/me-image",
@@ -60,9 +63,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "quikconvert",
+    title: "quikconvert - Convert Cups to Grams",
     description:
-      "Convert cooking measurements instantly - cups to ml, ounces to grams, Fahrenheit to Celsius.",
+      "Convert recipe measurements from cups & tablespoons to grams for food scales. Perfect for baking by weight with instant conversions.",
     creator: "@jonathonhackbarth",
     images: ["/me-image"],
   },

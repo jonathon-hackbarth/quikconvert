@@ -8,7 +8,7 @@ export function getSchemaMarkup() {
     "@type": "WebApplication",
     name: "quikconvert",
     description:
-      "Fast kitchen and cooking converter for recipes, baking, and meal prep. Convert cups to ml, ounces to grams, Fahrenheit to Celsius instantly.",
+      "Convert recipe measurements from cups, tablespoons, and teaspoons to grams for food scales. The best volume to weight converter for baking by weight. Instantly convert fractions like 1/3 cup to grams, 2 tbsp to grams, and more.",
     url: "https://quikconvert.app",
     applicationCategory: "UtilityApplication",
     offers: {
@@ -25,11 +25,14 @@ export function getSchemaMarkup() {
       name: "Jonathan Hackbarth",
     },
     keywords: [
-      "kitchen converter",
-      "cooking converter",
+      "cups to grams",
+      "tablespoons to grams",
+      "teaspoons to grams",
+      "volume to weight converter",
+      "baking by weight",
+      "food scale converter",
       "recipe converter",
-      "baking converter",
-      "cooking measurements",
+      "kitchen scale measurements",
     ],
   };
 }
@@ -38,29 +41,29 @@ export function getConverterSchemaMarkup() {
   return [
     {
       "@type": "HowTo",
-      name: "How to Convert Cooking Measurements",
+      name: "How to Convert Cups and Tablespoons to Grams for Food Scales",
       description:
-        "Convert kitchen measurements for recipes and baking. Instantly convert between volume, weight, and temperature units.",
+        "Convert recipe volume measurements (cups, tablespoons, teaspoons) to weight in grams for use with food scales. Perfect for baking by weight with accurate conversions including ingredient-specific densities.",
       step: [
         {
           "@type": "HowToStep",
-          name: "Select measurement type",
-          text: "Choose between volume (cups, ml), weight (oz, grams), or temperature (F, C) conversions",
+          name: "Select volume to weight conversion",
+          text: "Choose volume units like cups, tablespoons (tbsp), or teaspoons (tsp) to convert to weight in grams",
         },
         {
           "@type": "HowToStep",
-          name: "Enter the ingredient amount",
-          text: "Input the measurement value you want to convert from your recipe",
+          name: "Enter the recipe measurement",
+          text: "Input the volume measurement from your recipe, including fractions like 1/3 cup or 2 1/2 tablespoons",
         },
         {
           "@type": "HowToStep",
-          name: "Select from and to units",
-          text: "Choose the 'from' and 'to' units for your cooking measurement conversion",
+          name: "Select ingredient type (optional)",
+          text: "For accurate conversions, specify the ingredient (flour, sugar, butter, etc.) as different ingredients have different densities",
         },
         {
           "@type": "HowToStep",
-          name: "View the result",
-          text: "The converted measurement appears instantly, ready to use in your recipe",
+          name: "Get weight in grams for your food scale",
+          text: "The converted weight appears instantly in grams, ready to measure on your kitchen food scale for precise baking results",
         },
       ],
     },
