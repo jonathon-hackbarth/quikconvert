@@ -30,32 +30,32 @@ export function HomeClient() {
             {/* Left Column */}
             <div className="space-y-6 text-muted-foreground lowercase">
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-                about quikconvert
+                convert cups to grams for your food scale
               </h2>
               
               <p>
-                <strong>quikconvert</strong> is a fast, easy-to-use kitchen measurement converter designed for home cooks, professional chefs, and bakers. whether you&apos;re following a recipe from another country or scaling your favorite dish, quikconvert instantly converts cooking measurements so you can focus on what matters&mdash;creating delicious food.
+                <strong>quikconvert</strong> is the fastest way to convert recipe volume measurements (cups, tablespoons, teaspoons) to grams for your food scale. perfect for bakers and home cooks who want the precision of weight-based measurements. convert fractions like <strong>1/3 cup to grams</strong>, <strong>2 tablespoons to grams</strong>, or <strong>1 1/2 teaspoons to grams</strong> instantly.
               </p>
 
               <h3 className="text-lg font-semibold text-foreground mt-6">
-                what can you convert?
+                why convert volume to weight?
               </h3>
               <ul className="space-y-3 ml-4">
                 <li className="flex gap-3">
                   <span className="text-primary font-bold flex-shrink-0">•</span>
-                  <span><strong>volume measurements:</strong> cups, tablespoons, teaspoons, milliliters, liters, and more</span>
+                  <span><strong>more accurate baking:</strong> weight measurements (grams) are more precise than volume (cups), leading to better results</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-primary font-bold flex-shrink-0">•</span>
-                  <span><strong>weight measurements:</strong> ounces, pounds, grams, kilograms, and other units</span>
+                  <span><strong>use your food scale:</strong> if you have a kitchen scale that measures in grams, easily convert any recipe</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-primary font-bold flex-shrink-0">•</span>
-                  <span><strong>temperature:</strong> quickly convert between fahrenheit and celsius for precise cooking</span>
+                  <span><strong>international recipes:</strong> many recipes worldwide use grams instead of cups</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-primary font-bold flex-shrink-0">•</span>
-                  <span><strong>ingredient density:</strong> accurately convert between volume and weight for common ingredients like flour, sugar, butter, and water</span>
+                  <span><strong>ingredient-specific conversions:</strong> different ingredients have different densities (1 cup of flour ≠ 1 cup of sugar in grams)</span>
                 </li>
               </ul>
             </div>
@@ -63,33 +63,55 @@ export function HomeClient() {
             {/* Right Column */}
             <div className="space-y-6 text-muted-foreground lowercase">
               <h3 className="text-lg font-semibold text-foreground mt-6 lg:mt-0">
+                what you can convert
+              </h3>
+              <ul className="space-y-3 ml-4">
+                <li className="flex gap-3">
+                  <span className="text-primary font-bold flex-shrink-0">•</span>
+                  <span><strong>cups to grams:</strong> convert 1 cup, 1/2 cup, 1/3 cup, 1/4 cup, 2/3 cup, 3/4 cup to grams</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-primary font-bold flex-shrink-0">•</span>
+                  <span><strong>tablespoons to grams:</strong> convert tbsp measurements to grams for precise weighing</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-primary font-bold flex-shrink-0">•</span>
+                  <span><strong>teaspoons to grams:</strong> convert tsp to grams for small ingredient measurements</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-primary font-bold flex-shrink-0">•</span>
+                  <span><strong>other volume & weight:</strong> milliliters, liters, ounces, pounds, and kilograms</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-primary font-bold flex-shrink-0">•</span>
+                  <span><strong>temperature:</strong> fahrenheit to celsius for oven settings</span>
+                </li>
+              </ul>
+
+              <h3 className="text-lg font-semibold text-foreground mt-8">
                 perfect for
               </h3>
               <ul className="space-y-3 ml-4">
                 <li className="flex gap-3">
                   <span className="text-primary font-bold flex-shrink-0">•</span>
-                  <span>recipe conversion for international recipes</span>
+                  <span>baking by weight with a digital food scale</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-primary font-bold flex-shrink-0">•</span>
-                  <span>scaling recipes up or down for different serving sizes</span>
+                  <span>converting american recipes to metric (grams)</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-primary font-bold flex-shrink-0">•</span>
-                  <span>baking by weight for more accurate results</span>
+                  <span>precise recipe scaling for consistent results</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-primary font-bold flex-shrink-0">•</span>
-                  <span>quick meal prep calculations</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-primary font-bold flex-shrink-0">•</span>
-                  <span>kitchen measurement reference</span>
+                  <span>professional baking and meal prep</span>
                 </li>
               </ul>
 
               <p className="mt-8 pt-4 border-t border-muted-foreground/20">
-                convert cooking measurements instantly with quikconvert&mdash;the fastest kitchen converter for recipes, baking, and meal prep. no ads, no distractions, just accurate conversions when you need them.
+                convert cups, tablespoons, and teaspoons to grams instantly&mdash;the fastest volume to weight converter for baking by weight and using food scales. no ads, no distractions, just accurate conversions when you need them.
               </p>
             </div>
           </div>
