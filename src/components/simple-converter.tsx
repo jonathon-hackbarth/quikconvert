@@ -100,7 +100,6 @@ export function SimpleConverter() {
         error: result.error,
         usesDefaultDensity: result.usesDefaultDensity,
         isWeightVolumeConversion,
-        ingredientName: ingredientInput || "water",
       };
     }
 
@@ -114,7 +113,6 @@ export function SimpleConverter() {
       error: null as string | null,
       usesDefaultDensity: result.usesDefaultDensity,
       isWeightVolumeConversion,
-      ingredientName: ingredientInput || "water",
     };
   }, [conversionResult, toUnitInput, isWeightVolumeConversion, ingredientInput]);
 
@@ -125,7 +123,6 @@ export function SimpleConverter() {
   const getDensityMessage = useCallback(() => {
     if (!isWeightVolumeConversion) return null;
     
-    const ingredientName = ingredientInput || "water";
     const density = getIngredientDensity(ingredientInput);
     const displayName = ingredientInput ? ingredientInput : "standard water";
     
