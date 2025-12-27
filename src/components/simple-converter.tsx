@@ -213,14 +213,19 @@ export function SimpleConverter() {
             onChange={handleIngredientChange}
             options={ingredientOptions}
             placeholder="e.g., flour, sugar, water (for density)"
-            label={
-              isWeightVolumeConversion
-                ? "what ingredient? (optional, for accurate weight ↔ volume conversion)"
-                : "what ingredient? (optional, only used for weight ↔ volume)"
-            }
+            label="what ingredient?"
             id="ingredient-input"
             tabIndex={4}
           />
+          {isWeightVolumeConversion ? (
+            <p className="text-xs text-muted-foreground">
+              optional, for accurate weight ↔ volume conversion
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              optional, only used for weight ↔ volume
+            </p>
+          )}
           {isWeightVolumeConversion && ingredientInput && (
             <button
               type="button"
